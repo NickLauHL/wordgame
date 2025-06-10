@@ -152,6 +152,18 @@ const WordScrambleGame = () => {
             sendDataToQualtrics(responseData);
             setCurrentIndex((i) => i + 1);
           } else {
+            // 最后一个单词完成时的处理
+            const responseData = {
+              word: currentWord.word,
+              userAnswer: selectedLetters.map(l => l.letter).join(''),
+              correct: true,
+              type: 'submit',
+              index: currentIndex + 1,
+              timestamp: Date.now(),
+              urlParams: params,
+            };
+            setResponses(prev => [...prev, responseData]);
+            sendDataToQualtrics(responseData);
             setGameComplete(true);
           }
         }, 1000);
@@ -166,7 +178,15 @@ const WordScrambleGame = () => {
     }
   }, [selectedLetters, isCorrect, wrongAnswer, showCorrect, currentIndex, currentWord, wordsList.length, params]);
 
-  // 8. Helper function to send data to Qualtrics
+  // 8. 当游戏完成时，通知 Qualtrics 显示下一步按钮
+  useEffect(() => {
+    if (gameComplete) {
+      // 发送完成游戏的消息给 Qualtrics
+      window.parent.postMessage({ type: 'showNextButton' }, '*');
+    }
+  }, [gameComplete]);
+
+  // 9. Helper function to send data to Qualtrics
   const sendDataToQualtrics = (responseData) => {
     try {
       window.parent.postMessage({
@@ -178,7 +198,7 @@ const WordScrambleGame = () => {
     }
   };
 
-  // 9. Handlers
+  // 10. Handlers
   const pickLetter = (letter) => {
     if (!isCorrect && !wrongAnswer && !showCorrect && selectedLetters.length < currentWord.word.length) {
       setSelectedLetters((s) => [...s, letter]);
@@ -234,6 +254,7 @@ const WordScrambleGame = () => {
     };
     setResponses(prev => [...prev, responseData]);
     sendDataToQualtrics(responseData);
+    window.parent.postMessage({ type: 'showNextButton' }, '*');
     setEnded(true);
   };
 
@@ -251,7 +272,7 @@ const WordScrambleGame = () => {
     URL.revokeObjectURL(url);
   };
 
-  // 10. Circular progress component
+  // 11. Circular progress component
   const CircularProgress = ({ pct }) => {
     const r = 50;
     const c = 2 * Math.PI * r;
@@ -287,7 +308,7 @@ const WordScrambleGame = () => {
     );
   };
 
-  // 11. End screen
+  // 12. End screen
   if (ended) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-teal-500 flex items-center justify-center p-4">
@@ -298,7 +319,7 @@ const WordScrambleGame = () => {
     );
   }
 
-  // 12. Game complete screen
+  // 13. Game complete screen
   if (gameComplete) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-teal-500 flex items-center justify-center p-4">
@@ -306,6 +327,7 @@ const WordScrambleGame = () => {
           <h1 className="text-3xl font-bold text-gray-800 mb-4">Game Complete</h1>
           <p className="mt-6 text-lg text-gray-800">You have gone through all 40 words.</p>
           <p className="mt-2 text-base text-gray-600">Thanks for participating!</p>
+          <p className="mt-4 text-sm text-gray-500">Click the arrow below to continue to the next page.</p>
           {params.admin === '1' && (
             <button
               onClick={handleExport}
@@ -319,7 +341,7 @@ const WordScrambleGame = () => {
     );
   }
 
-  // 13. Main game UI
+  // 14. Main game UI
   const percentComplete = (currentIndex / wordsList.length) * 100;
   
   return (
