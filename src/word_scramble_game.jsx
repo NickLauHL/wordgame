@@ -279,8 +279,8 @@ const WordScrambleGame = () => {
     const offset = c - (pct / 100) * c;
     
     return (
-      <div className="relative w-32 h-32 mx-auto">
-        <svg className="w-32 h-32 -rotate-90" viewBox="0 0 120 120">
+      <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 mx-auto">
+        <svg className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 -rotate-90" viewBox="0 0 120 120">
           {/* 渐变定义 */}
           <defs>
             <linearGradient id="circle-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -311,9 +311,9 @@ const WordScrambleGame = () => {
   // 12. End screen
   if (ended) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-teal-500 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-md">
-          <h2 className="text-2xl font-bold mb-4 text-gray-800">Thanks for participating!</h2>
+      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-teal-500 flex items-center justify-center p-2 sm:p-4">
+        <div className="bg-white rounded-2xl p-4 sm:p-6 md:p-8 max-w-md w-full text-center shadow-md">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-2 sm:mb-4 text-gray-800">Thanks for participating!</h2>
         </div>
       </div>
     );
@@ -322,16 +322,16 @@ const WordScrambleGame = () => {
   // 13. Game complete screen
   if (gameComplete) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-teal-500 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center">
-          <h1 className="text-3xl font-bold text-gray-800 mb-4">Game Complete</h1>
-          <p className="mt-6 text-lg text-gray-800">You have gone through all 40 words.</p>
-          <p className="mt-2 text-base text-gray-600">Thanks for participating!</p>
-          <p className="mt-4 text-sm text-gray-500">Click the arrow below to continue to the next page.</p>
+      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-teal-500 flex items-center justify-center p-2 sm:p-4">
+        <div className="bg-white rounded-2xl p-4 sm:p-6 md:p-8 max-w-md w-full text-center">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2 sm:mb-4">Game Complete</h1>
+          <p className="mt-3 sm:mt-4 md:mt-6 text-sm sm:text-base md:text-lg text-gray-800">You have gone through all 40 words.</p>
+          <p className="mt-2 text-xs sm:text-sm md:text-base text-gray-600">Thanks for participating!</p>
+          <p className="mt-2 sm:mt-4 text-xs sm:text-sm text-gray-500">Click the arrow below to continue to the next page.</p>
           {params.admin === '1' && (
             <button
               onClick={handleExport}
-              className="px-4 py-2 bg-blue-500 text-white rounded mt-4"
+              className="px-3 py-2 bg-blue-500 text-white rounded mt-2 sm:mt-4 text-sm"
             >
               导出数据
             </button>
@@ -345,15 +345,15 @@ const WordScrambleGame = () => {
   const percentComplete = (currentIndex / wordsList.length) * 100;
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-teal-500 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl p-8 max-w-2xl w-full">
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-teal-500 flex items-center justify-center p-2 sm:p-4">
+      <div className="bg-white rounded-2xl p-4 sm:p-6 md:p-8 max-w-2xl w-full">
         {/* Header */}
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600 mb-4">
+        <div className="text-center mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600 mb-2 sm:mb-4">
             Word Scramble Game
           </h1>
-          <div className="flex justify-end mb-4">
-            <span className="text-green-600 font-bold">${score.toFixed(2)}</span>
+          <div className="flex justify-end mb-2 sm:mb-4">
+            <span className="text-green-600 font-bold text-sm sm:text-base">${score.toFixed(2)}</span>
           </div>
         </div>
 
@@ -362,9 +362,9 @@ const WordScrambleGame = () => {
           <>
             <div className="mb-2">
               {progressBarType === 'bar' ? (
-                <div className="w-full bg-white rounded-full h-4" style={{ boxShadow: 'none' }}>
+                <div className="w-full bg-white rounded-full h-3 sm:h-4" style={{ boxShadow: 'none' }}>
                   <div
-                    className="h-4 rounded-full transition-all duration-500 bg-gradient-to-r from-purple-500 to-blue-500"
+                    className="h-3 sm:h-4 rounded-full transition-all duration-500 bg-gradient-to-r from-purple-500 to-blue-500"
                     style={{ width: `${percentComplete}%`, boxShadow: 'none' }}
                   />
                 </div>
@@ -372,24 +372,24 @@ const WordScrambleGame = () => {
                 <CircularProgress pct={percentComplete} />
               )}
             </div>
-            <div className="text-center mb-6">
-              <span className="text-sm text-gray-600">current progress</span>
+            <div className="text-center mb-4 sm:mb-6">
+              <span className="text-xs sm:text-sm text-gray-600">current progress</span>
             </div>
           </>
         )}
 
         {/* Hint */}
-        <div className="text-center mb-6">
-          <p className="text-gray-700 text-lg font-medium">{currentWord.hint}</p>
+        <div className="text-center mb-4 sm:mb-6">
+          <p className="text-gray-700 text-sm sm:text-base md:text-lg font-medium px-2">{currentWord.hint}</p>
         </div>
 
         {/* Answer Boxes */}
-        <div className="mb-6 flex justify-center">
-          <div className="flex flex-wrap gap-2 max-w-4xl justify-center">
+        <div className="mb-4 sm:mb-6 flex justify-center">
+          <div className="flex flex-wrap gap-1 sm:gap-2 max-w-4xl justify-center">
             {Array.from({ length: currentWord.word.length }).map((_, idx) => (
               <div
                 key={idx}
-                className={`w-10 h-10 border-2 border-dashed rounded-lg flex items-center justify-center cursor-pointer transition-all duration-200 ${
+                className={`w-8 h-8 sm:w-10 sm:h-10 border-2 border-dashed rounded-lg flex items-center justify-center cursor-pointer transition-all duration-200 ${
                   wrongAnswer
                     ? 'border-red-400 bg-red-50 animate-pulse'
                     : isCorrect
@@ -403,7 +403,7 @@ const WordScrambleGame = () => {
                 onClick={() => removeLetter(selectedLetters[idx], idx)}
               >
                 {selectedLetters[idx] && (
-                  <span className="text-lg font-bold text-gray-800">
+                  <span className="text-sm sm:text-base md:text-lg font-bold text-gray-800">
                     {selectedLetters[idx].letter}
                   </span>
                 )}
@@ -413,13 +413,13 @@ const WordScrambleGame = () => {
         </div>
 
         {/* Letter Tiles */}
-        <div className="flex flex-wrap gap-3 justify-center mb-4">
+        <div className="flex flex-wrap gap-2 sm:gap-3 justify-center mb-3 sm:mb-4">
           {availableLetters.map((l) => (
             <button
               key={l.id}
               onClick={() => pickLetter(l)}
               disabled={isCorrect || wrongAnswer || showCorrect}
-              className={`w-16 h-16 bg-white border-2 border-gray-300 rounded-xl text-2xl font-bold transition-all duration-200 ${
+              className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white border-2 border-gray-300 rounded-xl text-lg sm:text-xl md:text-2xl font-bold transition-all duration-200 ${
                 isCorrect || wrongAnswer || showCorrect
                   ? 'opacity-50 cursor-not-allowed'
                   : 'hover:border-purple-500 hover:bg-purple-50 hover:scale-105 cursor-pointer'
@@ -431,21 +431,21 @@ const WordScrambleGame = () => {
         </div>
 
         {/* Instructions */}
-        <p className="text-center text-gray-600 text-sm mb-4">
+        <p className="text-center text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 px-2">
           Click letters to form the correct word • Click selected letters to remove them
         </p>
 
         {/* Actions (bottom) */}
-        <div className="flex justify-center gap-4 mb-2">
+        <div className="flex justify-center gap-2 sm:gap-4 mb-2">
           <button
             onClick={handleDontKnow}
-            className="px-4 py-2 bg-yellow-400 text-white rounded"
+            className="px-3 py-2 bg-yellow-400 text-white rounded text-sm sm:text-base"
           >
             I Don't Know
           </button>
           <button
             onClick={handleEnd}
-            className="px-4 py-2 bg-red-500 text-white rounded"
+            className="px-3 py-2 bg-red-500 text-white rounded text-sm sm:text-base"
           >
             End
           </button>
@@ -453,18 +453,18 @@ const WordScrambleGame = () => {
 
         {/* Feedback */}
         {wrongAnswer && (
-          <div className="text-center mt-4">
-            <p className="text-red-700 font-semibold">Try again!</p>
+          <div className="text-center mt-3 sm:mt-4">
+            <p className="text-red-700 font-semibold text-sm sm:text-base">Try again!</p>
           </div>
         )}
         {isCorrect && (
-          <div className="text-center mt-4">
-            <p className="text-green-700 font-semibold">Correct! +$0.04 bonus</p>
+          <div className="text-center mt-3 sm:mt-4">
+            <p className="text-green-700 font-semibold text-sm sm:text-base">Correct! +$0.04 bonus</p>
           </div>
         )}
         {showCorrect && (
-          <div className="text-center mt-4">
-            <p className="text-blue-700 font-semibold">This is the correct answer. (No bonus)</p>
+          <div className="text-center mt-3 sm:mt-4">
+            <p className="text-blue-700 font-semibold text-sm sm:text-base">This is the correct answer. (No bonus)</p>
           </div>
         )}
       </div>
