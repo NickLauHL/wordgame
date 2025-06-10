@@ -139,18 +139,17 @@ const WordScrambleGame = () => {
           setIsCorrect(false);
           
           if (currentIndex < wordsList.length - 1) {
-            setResponses(prev => [
-              ...prev,
-              {
-                word: currentWord.word,
-                userAnswer: selectedLetters.map(l => l.letter).join(''),
-                correct: true,
-                type: 'submit',
-                index: currentIndex + 1,
-                timestamp: Date.now(),
-                urlParams: params,
-              }
-            ]);
+            const responseData = {
+              word: currentWord.word,
+              userAnswer: selectedLetters.map(l => l.letter).join(''),
+              correct: true,
+              type: 'submit',
+              index: currentIndex + 1,
+              timestamp: Date.now(),
+              urlParams: params,
+            };
+            setResponses(prev => [...prev, responseData]);
+            sendDataToQualtrics(responseData);
             setCurrentIndex((i) => i + 1);
           } else {
             setGameComplete(true);
@@ -167,7 +166,19 @@ const WordScrambleGame = () => {
     }
   }, [selectedLetters, isCorrect, wrongAnswer, showCorrect, currentIndex, currentWord, wordsList.length, params]);
 
-  // 8. Handlers
+  // 8. Helper function to send data to Qualtrics
+  const sendDataToQualtrics = (responseData) => {
+    try {
+      window.parent.postMessage({
+        type: 'wordScrambleData',
+        data: responseData
+      }, '*');
+    } catch (error) {
+      console.log('Could not send data to parent:', error);
+    }
+  };
+
+  // 9. Handlers
   const pickLetter = (letter) => {
     if (!isCorrect && !wrongAnswer && !showCorrect && selectedLetters.length < currentWord.word.length) {
       setSelectedLetters((s) => [...s, letter]);
@@ -186,18 +197,17 @@ const WordScrambleGame = () => {
     if (showCorrect) return;
     
     setShowCorrect(true);
-    setResponses(prev => [
-      ...prev,
-      {
-        word: currentWord.word,
-        userAnswer: '',
-        correct: false,
-        type: 'dont_know',
-        index: currentIndex + 1,
-        timestamp: Date.now(),
-        urlParams: params,
-      }
-    ]);
+    const responseData = {
+      word: currentWord.word,
+      userAnswer: '',
+      correct: false,
+      type: 'dont_know',
+      index: currentIndex + 1,
+      timestamp: Date.now(),
+      urlParams: params,
+    };
+    setResponses(prev => [...prev, responseData]);
+    sendDataToQualtrics(responseData);
     const correct = currentWord.word.split('').map((l, i) => ({ letter: l, id: `correct-${i}` }));
     setSelectedLetters(correct);
     
@@ -213,18 +223,17 @@ const WordScrambleGame = () => {
 
   const handleEnd = () => {
     if (dontKnowTimer.current) clearTimeout(dontKnowTimer.current);
-    setResponses(prev => [
-      ...prev,
-      {
-        word: currentWord.word,
-        userAnswer: selectedLetters.map(l => l.letter).join(''),
-        correct: selectedLetters.map(l => l.letter).join('') === currentWord.word,
-        type: 'end',
-        index: currentIndex + 1,
-        timestamp: Date.now(),
-        urlParams: params,
-      }
-    ]);
+    const responseData = {
+      word: currentWord.word,
+      userAnswer: selectedLetters.map(l => l.letter).join(''),
+      correct: selectedLetters.map(l => l.letter).join('') === currentWord.word,
+      type: 'end',
+      index: currentIndex + 1,
+      timestamp: Date.now(),
+      urlParams: params,
+    };
+    setResponses(prev => [...prev, responseData]);
+    sendDataToQualtrics(responseData);
     setEnded(true);
   };
 
@@ -242,7 +251,7 @@ const WordScrambleGame = () => {
     URL.revokeObjectURL(url);
   };
 
-  // 9. Circular progress component
+  // 10. Circular progress component
   const CircularProgress = ({ pct }) => {
     const r = 50;
     const c = 2 * Math.PI * r;
@@ -278,7 +287,7 @@ const WordScrambleGame = () => {
     );
   };
 
-  // 10. End screen
+  // 11. End screen
   if (ended) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-teal-500 flex items-center justify-center p-4">
@@ -289,7 +298,7 @@ const WordScrambleGame = () => {
     );
   }
 
-  // 11. Game complete screen
+  // 12. Game complete screen
   if (gameComplete) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-teal-500 flex items-center justify-center p-4">
@@ -310,7 +319,7 @@ const WordScrambleGame = () => {
     );
   }
 
-  // 12. Main game UI
+  // 13. Main game UI
   const percentComplete = (currentIndex / wordsList.length) * 100;
   
   return (
