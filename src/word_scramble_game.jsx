@@ -9,49 +9,140 @@ function getUrlParams() {
 const WordScrambleGame = () => {
   const params = getUrlParams();
   
-  // 1. Static word list
+  // 1. Static word list - 131 words
   const originalWords = useMemo(
     () => [
-      { word: 'ECOSYSTEM', hint: 'A community of interacting organisms and their environment' },
-      { word: 'NOSTALGIA', hint: 'Longing for the past' },
-      { word: 'RESOLUTION', hint: 'An official decision that is made after a group or organization has voted' },
-      { word: 'OBFUSCATE', hint: 'To make something less clear and harder to understand, especially intentionally' },
-      { word: 'RHETORIC', hint: 'Using language effectively to please or persuade' },
-      { word: 'AVERSION', hint: 'A feeling of intense dislike' },
-      { word: 'OBSEQUIOUS', hint: 'Too eager to praise or obey someone' },
-      { word: 'LIBERTY', hint: 'Freedom from restriction' },
-      { word: 'QUANTUM', hint: 'The smallest possible discrete unit of any physical property' },
-      { word: 'ENTROPY', hint: 'A measure of disorder in a system' },
-      { word: 'ANALOGY', hint: 'A comparison between two things for explanation' },
-      { word: 'ARTICULATE', hint: 'Able to express ideas clearly and effectively' },
+      { word: 'SIMPLE', hint: 'Easy to understand or do' },
+      { word: 'NATURE', hint: 'The physical world around us' },
+      { word: 'FRIEND', hint: 'Someone you like and trust' },
+      { word: 'GARDEN', hint: 'Area where plants grow' },
+      { word: 'WINDOW', hint: 'Opening in a wall to let light in' },
+      { word: 'COFFEE', hint: 'Popular morning drink' },
+      { word: 'TRAVEL', hint: 'To go from one place to another' },
+      { word: 'CAMERA', hint: 'Device for taking pictures' },
+      { word: 'PUZZLE', hint: 'Game that tests your thinking' },
+      { word: 'BRIDGE', hint: 'Structure built over water' },
+      { word: 'PLANET', hint: 'Large body orbiting a star' },
+      { word: 'FOREST', hint: 'Large area covered with trees' },
       { word: 'MARKET', hint: 'Place where goods are sold' },
-      { word: 'BENEFICIARY', hint: 'A person who receives benefits' },
-      { word: 'HERITAGE', hint: 'Property or traditions passed down from earlier generations' },
+      { word: 'CANDLE', hint: 'Wax stick that burns for light' },
+      { word: 'FLOWER', hint: 'Colorful part of a plant' },
       { word: 'PENCIL', hint: 'Tool used for writing' },
-      { word: 'INTEGRITY', hint: 'The quality of being honest and having strong moral principles' },
       { word: 'RECIPE', hint: 'Instructions for cooking' },
-      { word: 'SENTIMENT', hint: 'A view or attitude toward a situation or event' },
-      { word: 'PARADIGM', hint: 'A typical example or pattern of something' },
-      { word: 'SCRUTINIZE', hint: 'Examine or inspect closely and thoroughly' },
+      { word: 'SCHOOL', hint: 'Place of learning' },
+      { word: 'DOCTOR', hint: 'Medical professional' },
+      { word: 'TICKET', hint: 'Pass to enter an event' },
       { word: 'HOCKEY', hint: 'Sport played on ice' },
       { word: 'BASKET', hint: 'Container for carrying things' },
       { word: 'JUNGLE', hint: 'Dense tropical forest' },
       { word: 'SPIDER', hint: 'Eight-legged creature' },
       { word: 'ROCKET', hint: 'Vehicle for space travel' },
-      { word: 'BROCHURE', hint: 'A small booklet or pamphlet containing information' },
+      { word: 'TEMPLE', hint: 'Religious building' },
       { word: 'PIRATE', hint: 'Sea robber' },
-      { word: 'CONFESSION', hint: 'A formal statement admitting guilt or fault' },
-      { word: 'INSOMNIA', hint: 'Habitual inability to sleep' },
-      { word: 'LANDMARK', hint: 'An object or feature that is easily seen and recognized' },
+      { word: 'VIOLIN', hint: 'String musical instrument' },
+      { word: 'BAKERY', hint: 'Shop that sells bread' },
+      { word: 'WINTER', hint: 'Coldest season of the year' },
       { word: 'MAGNET', hint: 'Object that attracts metal' },
-      { word: 'EMPATHY', hint: 'The ability to understand and share feelings' },
-      { word: 'PARADOX', hint: 'A seemingly contradictory statement that may be true' },
-      { word: 'DISCREPANCY', hint: 'A lack of compatibility or similarity between facts' },
-      { word: 'EXEMPLARY', hint: 'Serving as a desirable model' },
-      { word: 'INCUMBENT', hint: 'Currently holding office or position' },
+      { word: 'TURKEY', hint: 'Large bird eaten at Thanksgiving' },
+      { word: 'SCREEN', hint: 'Display surface for images' },
+      { word: 'NEPHEW', hint: 'Son of your sibling' },
+      { word: 'OXYGEN', hint: 'Gas we breathe to live' },
       { word: 'VOYAGE', hint: 'Long journey by sea' },
       { word: 'WIZARD', hint: 'Magical person in stories' },
-      { word: 'PERSEVERANCE', hint: 'Continued effort to do or achieve something, even when this is difficult or takes a long time' }
+      { word: 'PILLOW', hint: 'Soft object used to rest your head' },
+      { word: 'LADDER', hint: 'Structure for climbing up or down' },
+      { word: 'BALLET', hint: 'Graceful style of dancing' },
+      { word: 'BUTTON', hint: 'Small object used to fasten clothes' },
+      { word: 'BOTTLE', hint: 'Container used to hold liquids' },
+      { word: 'BEACH', hint: 'Sandy area near the ocean' },
+      { word: 'UMBRELLA', hint: 'Used to stay dry in the rain' },
+      { word: 'MONKEY', hint: 'A playful animal with a tail' },
+      { word: 'ORANGE', hint: 'A fruit and a color' },
+      { word: 'PRINCE', hint: 'Son of a king or queen' },
+      { word: 'MOTHER', hint: 'Female parent' },
+      { word: 'SUMMER', hint: 'Warmest season of the year' },
+      { word: 'NURSE', hint: 'Person who cares for the sick' },
+      { word: 'FARMER', hint: 'Person who grows crops or raises animals' },
+      { word: 'ISLAND', hint: 'Land surrounded by water' },
+      { word: 'STUDENT', hint: 'Person who learns at school' },
+      { word: 'MIRROR', hint: 'Reflective surface' },
+      { word: 'BRAIN', hint: 'Organ used for thinking' },
+      { word: 'TOOTH', hint: 'Hard part in your mouth used for chewing' },
+      { word: 'GLOVE', hint: 'Clothing for the hands' },
+      { word: 'FATHER', hint: 'Male parent' },
+      { word: 'SINGER', hint: 'Person who sings' },
+      { word: 'TABLE', hint: 'Furniture with a flat surface' },
+      { word: 'ZEBRA', hint: 'Black and white striped animal' },
+      { word: 'SPOON', hint: 'Tool for eating soup or cereal' },
+      { word: 'CUSHION', hint: 'Soft pad for sitting or leaning' },
+      { word: 'ENGINE', hint: 'Machine that powers vehicles' },
+      { word: 'FOSSIL', hint: 'Remains of ancient life in rock' },
+      { word: 'WALLET', hint: 'Small pouch for holding money' },
+      { word: 'POETRY', hint: 'Writing in verse, often with rhythm' },
+      { word: 'BRUSH', hint: 'Tool for cleaning or painting' },
+      { word: 'CLOCK', hint: 'Device for telling time' },
+      { word: 'CALENDAR', hint: 'Chart showing days and months' },
+      { word: 'COMPUTER', hint: 'Electronic device for work or play' },
+      { word: 'HOSPITAL', hint: 'Place for treating the sick' },
+      { word: 'ACCIDENT', hint: 'Unexpected harmful event' },
+      { word: 'BARBECUE', hint: 'Outdoor meal cooked on a grill' },
+      { word: 'BIRTHDAY', hint: 'Celebration of your birth' },
+      { word: 'FESTIVAL', hint: 'Public celebration with events' },
+      { word: 'ASTRONAUT', hint: 'Person who travels in space' },
+      { word: 'CLASSROOM', hint: 'Room where students learn' },
+      { word: 'DISCOVERY', hint: 'Finding something new' },
+      { word: 'INVENTION', hint: 'New device or process created' },
+      { word: 'TEACHER', hint: 'Person who gives lessons' },
+      { word: 'BLACKBOARD', hint: 'Board used to write with chalk' },
+      { word: 'BATTERY', hint: 'Provides power to devices' },
+      { word: 'HEADPHONE', hint: 'Worn on the head to listen to sound' },
+      { word: 'ELEVATOR', hint: 'Moves people between floors' },
+      { word: 'SUBMARINE', hint: 'Underwater vehicle' },
+      { word: 'THEATER', hint: 'Place to watch plays or performances' },
+      { word: 'MUSEUM', hint: 'Place that displays historical or artistic items' },
+      { word: 'VOLCANO', hint: 'Mountain that erupts lava' },
+      { word: 'EARTHQUAKE', hint: 'Shaking of the ground' },
+      { word: 'FOOTBALL', hint: 'Sport with kicking a ball to score goals' },
+      { word: 'BASKETBALL', hint: 'Sport of shooting a ball into a hoop' },
+      { word: 'HAPPINESS', hint: 'Feeling of great joy' },
+      { word: 'LAUGHTER', hint: 'The sound you make when happy or amused' },
+      { word: 'NERVOUS', hint: 'Feeling worried or anxious' },
+      { word: 'BRAVERY', hint: 'Being brave, not afraid' },
+      { word: 'BOTHER', hint: 'To annoy or disturb' },
+      { word: 'IGNORE', hint: 'To pay no attention' },
+      { word: 'OPTION', hint: 'A possible choice' },
+      { word: 'BROWSE', hint: 'Look through casually' },
+      { word: 'ADVICE', hint: 'Helpful recommendation' },
+      { word: 'RESCUE', hint: 'To save from danger' },
+      { word: 'CREATE', hint: 'To make something new' },
+      { word: 'EFFORT', hint: 'Attempt that requires energy' },
+      { word: 'ESCAPE', hint: 'Get away from danger or confinement' },
+      { word: 'PROCESS', hint: 'A series of steps or actions' },
+      { word: 'EXAMPLE', hint: 'Something used to show or explain' },
+      { word: 'CONCERN', hint: 'A feeling of worry or interest' },
+      { word: 'WARNING', hint: 'Statement of potential danger' },
+      { word: 'MEETING', hint: 'People gathering to discuss something' },
+      { word: 'SUPPORT', hint: 'To help or hold up' },
+      { word: 'PROBLEM', hint: 'Something that needs a solution' },
+      { word: 'RELEASE', hint: 'To let go or make public' },
+      { word: 'UPGRADE', hint: 'To improve something to a better version' },
+      { word: 'CAPTURE', hint: 'To catch or take control' },
+      { word: 'FORGIVE', hint: 'To stop feeling angry at someone' },
+      { word: 'CONTACT', hint: 'To get in touch with someone' },
+      { word: 'ARRIVAL', hint: 'The act of coming to a place' },
+      { word: 'REMOVAL', hint: 'The act of taking something away' },
+      { word: 'REVERSE', hint: 'To go backward or do the opposite' },
+      { word: 'INSIGHT', hint: 'Clear understanding of something' },
+      { word: 'REVENUE', hint: 'Money earned by a business' },
+      { word: 'DEADLINE', hint: 'Due date for a task or project' },
+      { word: 'CONTRACT', hint: 'Legal agreement' },
+      { word: 'OFFLINE', hint: 'Not connected to the internet' },
+      { word: 'JUSTIFY', hint: 'To give a reason or explanation' },
+      { word: 'APOLOGY', hint: 'Saying sorry for a mistake' },
+      { word: 'VISITOR', hint: 'Someone who comes to see a place or person' },
+      { word: 'RESERVE', hint: 'To book or keep something for future use' },
+      { word: 'STRANGER', hint: 'Someone you do not know' },
+      { word: 'LIBERTY', hint: 'Freedom from restriction' }
     ],
     []
   );
@@ -73,8 +164,9 @@ const WordScrambleGame = () => {
   // 4. Determine progress display type from URL (?type=bar or ?type=circle)
   const progressBarType = new URLSearchParams(window.location.search).get('type') === 'circle' ? 'circle' : 'bar';
 
-  // 5. Component state
+  // 5. Component state - KEY CHANGES HERE
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0); // NEW: Track correct answers
   const [availableLetters, setAvailableLetters] = useState([]);
   const [selectedLetters, setSelectedLetters] = useState([]);
   const [isCorrect, setIsCorrect] = useState(false);
@@ -86,12 +178,39 @@ const WordScrambleGame = () => {
   const [responses, setResponses] = useState([]);
   const scrambleRef = useRef([]);
   const dontKnowTimer = useRef(null);
-
+  const [currentWordRecord, setCurrentWordRecord] = useState(null);
   const currentWord = wordsList[currentIndex];
+
+  const [showPopup, setShowPopup] = useState(false);
+const [popupQuestions, setPopupQuestions] = useState({
+  question1: '',
+  question2: '',
+  correctCount: 0
+});
+const [popupAnswers, setPopupAnswers] = useState({
+  commitment: 0,
+  completion: 0
+});
 
   // 6. Initialize each round
   useEffect(() => {
     if (!currentWord) return;
+
+   // 记录单词开始时间和基础信息
+const wordStartTime = Date.now();
+const wordRecord = {
+  wordIndex: currentIndex + 1,
+  word: currentWord.word,
+  hint: currentWord.hint,
+  wordLength: currentWord.word.length,
+  startTime: wordStartTime,
+  progressType: progressBarType,
+  correctCountAtStart: correctCount,
+  interactions: [],
+  attempts: 0,
+  urlParams: params
+};
+setCurrentWordRecord(wordRecord);
     
     let letters = currentWord.word.split('');
     do {
@@ -119,13 +238,14 @@ const WordScrambleGame = () => {
     };
   }, [currentIndex, currentWord]);
 
-  // 7. Auto-check answer
+  // 7. Auto-check answer - MODIFIED LOGIC
   useEffect(() => {
     if (
       selectedLetters.length === 0 ||
       isCorrect ||
       wrongAnswer ||
       showCorrect ||
+      showPopup ||
       availableLetters.length === currentWord.word.length
     ) return;
     
@@ -135,38 +255,82 @@ const WordScrambleGame = () => {
       if (attempt === currentWord.word) {
         setIsCorrect(true);
         setScore(s => +(s + 0.04).toFixed(2));
-        setTimeout(() => {
-          setIsCorrect(false);
-          
-          if (currentIndex < wordsList.length - 1) {
-            const responseData = {
-              word: currentWord.word,
-              userAnswer: selectedLetters.map(l => l.letter).join(''),
-              correct: true,
-              type: 'submit',
-              index: currentIndex + 1,
-              timestamp: Date.now(),
-              urlParams: params,
-            };
-            setResponses(prev => [...prev, responseData]);
-            sendDataToQualtrics(responseData);
-            setCurrentIndex((i) => i + 1);
-          } else {
-            // 最后一个单词完成时的处理
-            const responseData = {
-              word: currentWord.word,
-              userAnswer: selectedLetters.map(l => l.letter).join(''),
-              correct: true,
-              type: 'submit',
-              index: currentIndex + 1,
-              timestamp: Date.now(),
-              urlParams: params,
-            };
-            setResponses(prev => [...prev, responseData]);
-            sendDataToQualtrics(responseData);
-            setGameComplete(true);
-          }
-        }, 1000);
+        const newCorrectCount = correctCount + 1;
+        setCorrectCount(newCorrectCount);
+        
+       setTimeout(() => {
+  setIsCorrect(false);
+
+  const completedWordRecord = {
+  ...currentWordRecord,
+  endTime: Date.now(),
+  duration: Date.now() - currentWordRecord.startTime,
+  attempts: currentWordRecord.interactions.filter(i => i.currentAttempt.length === currentWord.word.length).length,
+  finalAnswer: selectedLetters.map(l => l.letter).join(''),
+  success: true
+};
+  
+  // Check if we've reached 40 correct answers
+  if (newCorrectCount >= 40) {
+    // 现有的游戏完成逻辑保持不变...
+    const responseData = {
+      word: currentWord.word,
+      userAnswer: selectedLetters.map(l => l.letter).join(''),
+      correct: true,
+      type: 'submit',
+      index: currentIndex + 1,
+      correctCount: newCorrectCount,
+      timestamp: Date.now(),
+      urlParams: params,
+      wordDetails: completedWordRecord,
+    };
+    setResponses(prev => [...prev, responseData]);
+    sendDataToQualtrics(responseData);
+    setGameComplete(true);
+  } else {
+    // Check if we need to show popup questions
+    if ([10, 20, 30, 33, 36].includes(newCorrectCount)) {
+      const responseData = {
+        word: currentWord.word,
+        userAnswer: selectedLetters.map(l => l.letter).join(''),
+        correct: true,
+        type: 'submit',
+        index: currentIndex + 1,
+        correctCount: newCorrectCount,
+        timestamp: Date.now(),
+        urlParams: params,
+      };
+      setResponses(prev => [...prev, responseData]);
+      sendDataToQualtrics(responseData);
+      
+      // Show popup questions
+      const remaining = 40 - newCorrectCount;
+      setPopupQuestions({
+        question1: `You have already spelled ${newCorrectCount} words correctly, how committed do you feel now to continue spelling the remaining ${remaining} words to complete the entire task?`,
+        question2: `How soon do you think you will complete all 40 words?`,
+        correctCount: newCorrectCount
+      });
+      setPopupAnswers({ commitment: 0, completion: 0 });
+      setShowPopup(true);
+    } else {
+      // Continue to next word normally
+      const responseData = {
+        word: currentWord.word,
+        userAnswer: selectedLetters.map(l => l.letter).join(''),
+        correct: true,
+        type: 'submit',
+        index: currentIndex + 1,
+        correctCount: newCorrectCount,
+        timestamp: Date.now(),
+        urlParams: params,
+      };
+      setResponses(prev => [...prev, responseData]);
+      sendDataToQualtrics(responseData);
+      setSelectedLetters([]);
+      setCurrentIndex((i) => i + 1);
+    }
+  }
+}, 1000);
       } else {
         setWrongAnswer(true);
         setTimeout(() => {
@@ -176,7 +340,7 @@ const WordScrambleGame = () => {
         }, 1000);
       }
     }
-  }, [selectedLetters, isCorrect, wrongAnswer, showCorrect, currentIndex, currentWord, wordsList.length, params]);
+  }, [selectedLetters, isCorrect, wrongAnswer, showCorrect, currentIndex, currentWord, correctCount, params]);
 
   // 8. 当游戏完成时，通知 Qualtrics 显示下一步按钮
   useEffect(() => {
@@ -186,45 +350,152 @@ const WordScrambleGame = () => {
     }
   }, [gameComplete]);
 
-  // 9. Helper function to send data to Qualtrics
-  const sendDataToQualtrics = (responseData) => {
+  // 会话级别数据收集
+useEffect(() => {
+  const sendSessionData = () => {
+    const sessionData = {
+      type: 'session_data',
+      totalWordsAttempted: currentIndex,
+      totalCorrectAnswers: correctCount,
+      totalScore: score,
+      completionStatus: gameComplete ? 'completed' : ended ? 'ended_early' : 'in_progress',
+      progressType: progressBarType,
+      startTime: responses[0]?.timestamp || Date.now(),
+      endTime: Date.now(),
+      sessionDuration: responses.length > 0 ? Date.now() - responses[0].timestamp : 0,
+      totalResponses: responses.length,
+      urlParams: params,
+      // 在现有的 sessionData 对象中添加：
+averageWordDuration: responses.filter(r => r.wordDetails).reduce((sum, r) => sum + r.wordDetails.duration, 0) / responses.filter(r => r.wordDetails).length || 0,
+totalInteractions: responses.filter(r => r.wordDetails).reduce((sum, r) => sum + r.wordDetails.interactions.length, 0),
+abandonmentPoint: ended && !gameComplete ? currentIndex + 1 : null,
+progressTypeEffect: {
+  type: progressBarType,
+  finalCorrectCount: correctCount,
+  completionRate: correctCount / Math.min(currentIndex + 1, 40)
+}
+    };
+    
     try {
       window.parent.postMessage({
-        type: 'wordScrambleData',
-        data: responseData
+        type: 'sessionData',
+        data: sessionData
       }, '*');
+      
+      if (typeof window.Qualtrics !== 'undefined' && window.Qualtrics.SurveyEngine) {
+        window.Qualtrics.SurveyEngine.setEmbeddedData('sessionData', JSON.stringify(sessionData));
+      }
     } catch (error) {
-      console.log('Could not send data to parent:', error);
+      console.log('Could not send session data:', error);
     }
   };
+
+  // 当游戏完成或结束时发送会话数据
+  if (gameComplete || ended) {
+    sendSessionData();
+  }
+
+  // 页面卸载时也发送数据
+  const handleBeforeUnload = () => {
+    sendSessionData();
+  };
+
+  window.addEventListener('beforeunload', handleBeforeUnload);
+  return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+}, [currentIndex, correctCount, score, gameComplete, ended, progressBarType, responses, params]);
+
+  // 9. Helper function to send data to Qualtrics
+  const sendDataToQualtrics = (responseData) => {
+
+    
+  try {
+    // 发送给父窗口
+    window.parent.postMessage({
+      type: 'wordScrambleData',
+      data: responseData
+    }, '*');
+    
+    // 同时设置Qualtrics Embedded Data（如果可用）
+    if (typeof window.Qualtrics !== 'undefined' && window.Qualtrics.SurveyEngine) {
+      window.Qualtrics.SurveyEngine.setEmbeddedData('lastResponse', JSON.stringify(responseData));
+    }
+  } catch (error) {
+    console.log('Could not send data to parent:', error);
+  }
+};
 
   // 10. Handlers
   const pickLetter = (letter) => {
-    if (!isCorrect && !wrongAnswer && !showCorrect && selectedLetters.length < currentWord.word.length) {
-      setSelectedLetters((s) => [...s, letter]);
-      setAvailableLetters((a) => a.filter((x) => x.id !== letter.id));
+  if (!isCorrect && !wrongAnswer && !showCorrect && selectedLetters.length < currentWord.word.length) {
+    // 记录交互行为
+    if (currentWordRecord) {
+      const interaction = {
+        type: 'select',
+        letter: letter.letter,
+        letterId: letter.id,
+        timestamp: Date.now(),
+        selectedLettersCount: selectedLetters.length,
+        currentAttempt: selectedLetters.map(l => l.letter).join('') + letter.letter
+      };
+      setCurrentWordRecord(prev => ({
+        ...prev,
+        interactions: [...prev.interactions, interaction]
+      }));
     }
-  };
+    
+    setSelectedLetters((s) => [...s, letter]);
+    setAvailableLetters((a) => a.filter((x) => x.id !== letter.id));
+  }
+};
 
-  const removeLetter = (letter, idx) => {
-    if (!isCorrect && !wrongAnswer && !showCorrect && letter) {
-      setAvailableLetters((a) => [...a, letter]);
-      setSelectedLetters((s) => s.filter((_, i) => i !== idx));
+ const removeLetter = (letter, idx) => {
+  if (!isCorrect && !wrongAnswer && !showCorrect && letter) {
+    // 记录交互行为
+    if (currentWordRecord) {
+      const interaction = {
+        type: 'remove',
+        letter: letter.letter,
+        letterId: letter.id,
+        position: idx,
+        timestamp: Date.now(),
+        selectedLettersCount: selectedLetters.length - 1
+      };
+      setCurrentWordRecord(prev => ({
+        ...prev,
+        interactions: [...prev.interactions, interaction]
+      }));
     }
-  };
+    
+    setAvailableLetters((a) => [...a, letter]);
+    setSelectedLetters((s) => s.filter((_, i) => i !== idx));
+  }
+};
 
+  // MODIFIED: "I Don't Know" handler - no progress increase
   const handleDontKnow = () => {
     if (showCorrect) return;
     
     setShowCorrect(true);
+
+    const completedWordRecord = {
+  ...currentWordRecord,
+  endTime: Date.now(),
+  duration: Date.now() - currentWordRecord.startTime,
+  attempts: 0, // I Don't Know 算作0次尝试
+  finalAnswer: '',
+  success: false,
+  gaveUp: true
+};
     const responseData = {
       word: currentWord.word,
       userAnswer: '',
       correct: false,
       type: 'dont_know',
       index: currentIndex + 1,
+      correctCount: correctCount, // No increase in correct count
       timestamp: Date.now(),
       urlParams: params,
+      wordDetails: completedWordRecord,
     };
     setResponses(prev => [...prev, responseData]);
     sendDataToQualtrics(responseData);
@@ -233,24 +504,34 @@ const WordScrambleGame = () => {
     
     dontKnowTimer.current = setTimeout(() => {
       setShowCorrect(false);
-      if (currentIndex < wordsList.length - 1) {
-        setCurrentIndex((i) => i + 1);
-      } else {
-        setGameComplete(true);
-      }
+      // Always continue to next word (no progress check needed)
+      setSelectedLetters([]);
+      setCurrentIndex((i) => i + 1);
     }, 3000);
   };
 
   const handleEnd = () => {
     if (dontKnowTimer.current) clearTimeout(dontKnowTimer.current);
+
+    const completedWordRecord = {
+  ...currentWordRecord,
+  endTime: Date.now(),
+  duration: Date.now() - currentWordRecord.startTime,
+  attempts: currentWordRecord.interactions.filter(i => i.currentAttempt && i.currentAttempt.length === currentWord.word.length).length,
+  finalAnswer: selectedLetters.map(l => l.letter).join(''),
+  success: selectedLetters.map(l => l.letter).join('') === currentWord.word,
+  endedEarly: true
+};
     const responseData = {
       word: currentWord.word,
       userAnswer: selectedLetters.map(l => l.letter).join(''),
       correct: selectedLetters.map(l => l.letter).join('') === currentWord.word,
       type: 'end',
       index: currentIndex + 1,
+      correctCount: correctCount,
       timestamp: Date.now(),
       urlParams: params,
+      wordDetails: completedWordRecord,
     };
     setResponses(prev => [...prev, responseData]);
     sendDataToQualtrics(responseData);
@@ -271,6 +552,43 @@ const WordScrambleGame = () => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
+
+  const handlePopupSubmit = () => {
+  if (popupAnswers.commitment === 0 || popupAnswers.completion === 0) {
+    alert('Please answer both questions before continuing.');
+    return;
+  }
+  
+  // Send popup responses to Qualtrics
+  const popupData = {
+    type: 'popup_response',
+    correctCount: popupQuestions.correctCount,
+    commitment: popupAnswers.commitment,
+    completion: popupAnswers.completion,
+    timestamp: Date.now(),
+    urlParams: params,
+  };
+  setResponses(prev => [...prev, popupData]);
+  sendDataToQualtrics(popupData);
+  
+  // Close popup and continue to next word
+  setShowPopup(false);
+  // Close popup and continue to next word
+setShowPopup(false);
+// 直接跳到下一个单词，但重置所有状态，避免触发auto-check
+setSelectedLetters([]);
+setCurrentIndex((i) => i + 1);
+// 确保不会触发正确答案的逻辑
+setSelectedLetters([]);
+setAvailableLetters([]);
+};
+
+const handlePopupAnswer = (question, value) => {
+  setPopupAnswers(prev => ({
+    ...prev,
+    [question]: value
+  }));
+};
 
   // 11. Circular progress component
   const CircularProgress = ({ pct }) => {
@@ -319,13 +637,13 @@ const WordScrambleGame = () => {
     );
   }
 
-  // 13. Game complete screen
+  // 13. Game complete screen - MODIFIED MESSAGE
   if (gameComplete) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-teal-500 flex items-center justify-center p-2 sm:p-4">
         <div className="bg-white rounded-2xl p-4 sm:p-6 md:p-8 max-w-md w-full text-center">
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2 sm:mb-4">Game Complete</h1>
-          <p className="mt-3 sm:mt-4 md:mt-6 text-sm sm:text-base md:text-lg text-gray-800">You have gone through all 40 words.</p>
+          <p className="mt-3 sm:mt-4 md:mt-6 text-sm sm:text-base md:text-lg text-gray-800">You have correctly spelled all 40 words.</p>
           <p className="mt-2 text-xs sm:text-sm md:text-base text-gray-600">Thanks for participating!</p>
           <p className="mt-2 sm:mt-4 text-xs sm:text-sm text-gray-500">Click the arrow below to continue to the next page.</p>
           {params.admin === '1' && (
@@ -341,8 +659,8 @@ const WordScrambleGame = () => {
     );
   }
 
-  // 14. Main game UI
-  const percentComplete = (currentIndex / wordsList.length) * 100;
+  // 14. Main game UI - MODIFIED PROGRESS CALCULATION
+  const percentComplete = (correctCount / 40) * 100; // Changed from currentIndex to correctCount
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-teal-500 flex items-center justify-center p-2 sm:p-4">
@@ -357,8 +675,8 @@ const WordScrambleGame = () => {
           </div>
         </div>
 
-        {/* Progress (hidden on first) */}
-        {currentIndex > 0 && (
+        {/* Progress (hidden on first correct answer, not first word) */}
+        {correctCount > 0 && (
           <>
             <div className="mb-2">
               {progressBarType === 'bar' ? (
@@ -373,11 +691,80 @@ const WordScrambleGame = () => {
               )}
             </div>
             <div className="text-center mb-4 sm:mb-6">
-              <span className="text-xs sm:text-sm text-gray-600">current progress</span>
+              <span className="text-xs sm:text-sm text-gray-600">Your progress is shown above</span>
             </div>
           </>
         )}
-
+{/* Popup Questions */}
+{showPopup && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="bg-white rounded-2xl p-6 max-w-lg w-full">
+      <h2 className="text-xl font-bold text-gray-800 mb-6 text-center">Survey Questions</h2>
+      
+      {/* Question 1 */}
+      <div className="mb-6">
+        <p className="text-gray-700 mb-4 text-sm">
+          {popupQuestions.question1}
+        </p>
+        <div className="flex flex-wrap gap-2 justify-center">
+          {[1,2,3,4,5,6,7,8,9].map(num => (
+            <button
+              key={num}
+              onClick={() => handlePopupAnswer('commitment', num)}
+              className={`w-10 h-10 rounded-full border-2 text-sm font-semibold transition-all ${
+                popupAnswers.commitment === num 
+                  ? 'bg-purple-500 text-white border-purple-500' 
+                  : 'bg-white text-gray-700 border-gray-300 hover:border-purple-400'
+              }`}
+            >
+              {num}
+            </button>
+          ))}
+        </div>
+        <div className="flex justify-between text-xs text-gray-500 mt-2">
+          <span>1 = not at all</span>
+          <span>9 = extremely</span>
+        </div>
+      </div>
+      
+      {/* Question 2 */}
+      <div className="mb-6">
+        <p className="text-gray-700 mb-4 text-sm">
+          {popupQuestions.question2}
+        </p>
+        <div className="flex flex-wrap gap-2 justify-center">
+          {[1,2,3,4,5,6,7,8,9].map(num => (
+            <button
+              key={num}
+              onClick={() => handlePopupAnswer('completion', num)}
+              className={`w-10 h-10 rounded-full border-2 text-sm font-semibold transition-all ${
+                popupAnswers.completion === num 
+                  ? 'bg-purple-500 text-white border-purple-500' 
+                  : 'bg-white text-gray-700 border-gray-300 hover:border-purple-400'
+              }`}
+            >
+              {num}
+            </button>
+          ))}
+        </div>
+        <div className="flex justify-between text-xs text-gray-500 mt-2">
+          <span>1 = very slow</span>
+          <span>9 = very soon</span>
+        </div>
+      </div>
+      
+      {/* Submit Button */}
+      <div className="text-center">
+        <button
+          onClick={handlePopupSubmit}
+          className="px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+        >
+          Continue
+        </button>
+      </div>
+    </div>
+  </div>
+)}
         {/* Hint */}
         <div className="text-center mb-4 sm:mb-6">
           <p className="text-gray-700 text-sm sm:text-base md:text-lg font-medium px-2">{currentWord.hint}</p>
