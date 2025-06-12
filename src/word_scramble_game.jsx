@@ -177,7 +177,7 @@ const WordScrambleGame = () => {
   const [showCorrect, setShowCorrect] = useState(false);
   const [responses, setResponses] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
-  const [popupAnswers, setPopupAnswers] = useState({ commitment: null, completion: null });
+  const [popupAnswers, setPopupAnswers] = useState({ pleasing: null, energized: null, close: null });
   const [currentPopupCorrectCount, setCurrentPopupCorrectCount] = useState(0);
   const [isProcessingAnswer, setIsProcessingAnswer] = useState(false);
   const scrambleRef = useRef([]);
@@ -363,8 +363,8 @@ const WordScrambleGame = () => {
 
   // NEW: Handle popup responses
   const handlePopupSubmit = () => {
-    if (popupAnswers.commitment === null || popupAnswers.completion === null) {
-      alert('Please answer both questions before continuing.');
+    if (popupAnswers.pleasing === null || popupAnswers.energized === null || popupAnswers.close === null) {
+      alert('Please answer all three questions before continuing.');
       return;
     }
 
@@ -372,8 +372,9 @@ const WordScrambleGame = () => {
     const popupResponseData = {
       type: 'popup_response',
       correctCount: currentPopupCorrectCount,
-      commitmentScore: popupAnswers.commitment,
-      completionScore: popupAnswers.completion,
+      pleasingScore: popupAnswers.pleasing,
+      energizedScore: popupAnswers.energized,
+      closeScore: popupAnswers.close,
       timestamp: Date.now(),
       urlParams: params,
     };
@@ -382,7 +383,7 @@ const WordScrambleGame = () => {
 
     // Reset popup state
     setShowPopup(false);
-    setPopupAnswers({ commitment: null, completion: null });
+    setPopupAnswers({ pleasing: null, energized: null, close: null });
 
     // Check if game should complete or continue
     if (currentPopupCorrectCount >= 40) {
@@ -443,74 +444,96 @@ const WordScrambleGame = () => {
 
   // NEW: Popup Questions Component
   const PopupQuestions = () => {
-    const remaining = 40 - currentPopupCorrectCount;
-    
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-2xl p-6 max-w-lg w-full">
-          <h2 className="text-xl font-bold text-gray-800 mb-6 text-center">Quick Questions</h2>
-          
-          {/* Question 1 */}
-          <div className="mb-6">
-            <p className="text-gray-700 mb-4">
-              You have already spelled {currentPopupCorrectCount} words correctly. How committed do you feel now to continue spelling the remaining {remaining} words to complete the entire task?
-            </p>
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-gray-600">Not at all</span>
-              <span className="text-sm text-gray-600">Extremely</span>
-            </div>
-            <div className="flex justify-between">
-              {[1,2,3,4,5,6,7,8,9].map(num => (
-                <button
-                  key={num}
-                  onClick={() => setPopupAnswers(prev => ({...prev, commitment: num}))}
-                  className={`w-8 h-8 rounded-full border-2 transition-all ${
-                    popupAnswers.commitment === num 
-                      ? 'bg-purple-500 text-white border-purple-500' 
-                      : 'border-gray-300 hover:border-purple-300'
-                  }`}
-                >
-                  {num}
-                </button>
-              ))}
-            </div>
+      <div className="text-center">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6">Quick Questions</h2>
+        
+        {/* Question 1 */}
+        <div className="mb-8">
+          <p className="text-gray-700 mb-4 text-sm sm:text-base font-bold text-left">
+            Before continuing, how pleasing is it to see your current progress?
+          </p>
+          <div className="flex justify-between items-center mb-2 text-xs sm:text-sm">
+            <span className="text-gray-600">Not at all pleasing</span>
+            <span className="text-gray-600">Extremely pleasing</span>
           </div>
-          
-          {/* Question 2 */}
-          <div className="mb-6">
-            <p className="text-gray-700 mb-4">
-              How soon do you think you will complete all 40 words?
-            </p>
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-gray-600">Very slow</span>
-              <span className="text-sm text-gray-600">Very soon</span>
-            </div>
-            <div className="flex justify-between">
-              {[1,2,3,4,5,6,7,8,9].map(num => (
-                <button
-                  key={num}
-                  onClick={() => setPopupAnswers(prev => ({...prev, completion: num}))}
-                  className={`w-8 h-8 rounded-full border-2 transition-all ${
-                    popupAnswers.completion === num 
-                      ? 'bg-purple-500 text-white border-purple-500' 
-                      : 'border-gray-300 hover:border-purple-300'
-                  }`}
-                >
-                  {num}
-                </button>
-              ))}
-            </div>
+          <div className="flex justify-between">
+            {[1,2,3,4,5,6,7,8,9].map(num => (
+              <button
+                key={num}
+                onClick={() => setPopupAnswers(prev => ({...prev, pleasing: num}))}
+                className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 transition-all text-xs sm:text-sm ${
+                  popupAnswers.pleasing === num 
+                    ? 'bg-purple-500 text-white border-purple-500' 
+                    : 'border-gray-300 hover:border-purple-300'
+                }`}
+              >
+                {num}
+              </button>
+            ))}
           </div>
-          
-          {/* Submit button */}
-          <div className="text-center">
-            <button
-              onClick={handlePopupSubmit}
-              className="px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
-            >
-              Continue
-            </button>
+        </div>
+        
+        {/* Question 2 */}
+        <div className="mb-8">
+          <p className="text-gray-700 mb-4 text-sm sm:text-base font-bold text-left">
+            Right now, how energized do you feel?
+          </p>
+          <div className="flex justify-between items-center mb-2 text-xs sm:text-sm">
+            <span className="text-gray-600">Not energized at all</span>
+            <span className="text-gray-600">Extremely energized</span>
           </div>
+          <div className="flex justify-between">
+            {[1,2,3,4,5,6,7,8,9].map(num => (
+              <button
+                key={num}
+                onClick={() => setPopupAnswers(prev => ({...prev, energized: num}))}
+                className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 transition-all text-xs sm:text-sm ${
+                  popupAnswers.energized === num 
+                    ? 'bg-purple-500 text-white border-purple-500' 
+                    : 'border-gray-300 hover:border-purple-300'
+                }`}
+              >
+                {num}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        {/* Question 3 */}
+        <div className="mb-8">
+          <p className="text-gray-700 mb-4 text-sm sm:text-base font-bold text-left">
+            At this moment, how close do you feel to completing your goal of spelling 40 words?
+          </p>
+          <div className="flex justify-between items-center mb-2 text-xs sm:text-sm">
+            <span className="text-gray-600">Very far away</span>
+            <span className="text-gray-600">Very close</span>
+          </div>
+          <div className="flex justify-between">
+            {[1,2,3,4,5,6,7,8,9].map(num => (
+              <button
+                key={num}
+                onClick={() => setPopupAnswers(prev => ({...prev, close: num}))}
+                className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 transition-all text-xs sm:text-sm ${
+                  popupAnswers.close === num 
+                    ? 'bg-purple-500 text-white border-purple-500' 
+                    : 'border-gray-300 hover:border-purple-300'
+                }`}
+              >
+                {num}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        {/* Submit button */}
+        <div className="text-center">
+          <button
+            onClick={handlePopupSubmit}
+            className="px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm sm:text-base"
+          >
+            Continue
+          </button>
         </div>
       </div>
     );
@@ -554,9 +577,6 @@ const WordScrambleGame = () => {
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-teal-500 flex items-center justify-center p-2 sm:p-4">
-      {/* Popup Questions */}
-      {showPopup && <PopupQuestions />}
-      
       <div className="bg-white rounded-2xl p-4 sm:p-6 md:p-8 max-w-2xl w-full">
         {/* Header */}
         <div className="text-center mb-4 sm:mb-6">
@@ -589,94 +609,101 @@ const WordScrambleGame = () => {
           </>
         )}
 
-        {/* Hint */}
-        <div className="text-center mb-4 sm:mb-6">
-          <p className="text-gray-700 text-sm sm:text-base md:text-lg font-medium px-2">{currentWord.hint}</p>
-        </div>
+        {/* Show popup questions in-page OR normal game content */}
+        {showPopup ? (
+          <PopupQuestions />
+        ) : (
+          <>
+            {/* Hint */}
+            <div className="text-center mb-4 sm:mb-6">
+              <p className="text-gray-700 text-sm sm:text-base md:text-lg font-medium px-2">{currentWord.hint}</p>
+            </div>
 
-        {/* Answer Boxes */}
-        <div className="mb-4 sm:mb-6 flex justify-center">
-          <div className="flex flex-wrap gap-1 sm:gap-2 max-w-4xl justify-center">
-            {Array.from({ length: currentWord.word.length }).map((_, idx) => (
-              <div
-                key={idx}
-                className={`w-8 h-8 sm:w-10 sm:h-10 border-2 border-dashed rounded-lg flex items-center justify-center cursor-pointer transition-all duration-200 ${
-                  wrongAnswer
-                    ? 'border-red-400 bg-red-50 animate-pulse'
-                    : isCorrect
-                    ? 'border-green-400 bg-green-50'
-                    : showCorrect
-                    ? 'border-blue-400 bg-blue-50'
-                    : selectedLetters[idx]
-                    ? 'border-purple-500 bg-purple-50'
-                    : 'border-gray-400 hover:border-purple-400'
-                }`}
-                onClick={() => removeLetter(selectedLetters[idx], idx)}
-              >
-                {selectedLetters[idx] && (
-                  <span className="text-sm sm:text-base md:text-lg font-bold text-gray-800">
-                    {selectedLetters[idx].letter}
-                  </span>
-                )}
+            {/* Answer Boxes */}
+            <div className="mb-4 sm:mb-6 flex justify-center">
+              <div className="flex flex-wrap gap-1 sm:gap-2 max-w-4xl justify-center">
+                {Array.from({ length: currentWord.word.length }).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className={`w-8 h-8 sm:w-10 sm:h-10 border-2 border-dashed rounded-lg flex items-center justify-center cursor-pointer transition-all duration-200 ${
+                      wrongAnswer
+                        ? 'border-red-400 bg-red-50 animate-pulse'
+                        : isCorrect
+                        ? 'border-green-400 bg-green-50'
+                        : showCorrect
+                        ? 'border-blue-400 bg-blue-50'
+                        : selectedLetters[idx]
+                        ? 'border-purple-500 bg-purple-50'
+                        : 'border-gray-400 hover:border-purple-400'
+                    }`}
+                    onClick={() => removeLetter(selectedLetters[idx], idx)}
+                  >
+                    {selectedLetters[idx] && (
+                      <span className="text-sm sm:text-base md:text-lg font-bold text-gray-800">
+                        {selectedLetters[idx].letter}
+                      </span>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        {/* Letter Tiles */}
-        <div className="flex flex-wrap gap-2 sm:gap-3 justify-center mb-3 sm:mb-4">
-          {availableLetters.map((l) => (
-            <button
-              key={l.id}
-              onClick={() => pickLetter(l)}
-              disabled={isCorrect || wrongAnswer || showCorrect}
-              className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white border-2 border-gray-300 rounded-xl text-lg sm:text-xl md:text-2xl font-bold transition-all duration-200 ${
-                isCorrect || wrongAnswer || showCorrect
-                  ? 'opacity-50 cursor-not-allowed'
-                  : 'hover:border-purple-500 hover:bg-purple-50 hover:scale-105 cursor-pointer'
-              }`}
-            >
-              {l.letter}
-            </button>
-          ))}
-        </div>
+            {/* Letter Tiles */}
+            <div className="flex flex-wrap gap-2 sm:gap-3 justify-center mb-3 sm:mb-4">
+              {availableLetters.map((l) => (
+                <button
+                  key={l.id}
+                  onClick={() => pickLetter(l)}
+                  disabled={isCorrect || wrongAnswer || showCorrect}
+                  className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white border-2 border-gray-300 rounded-xl text-lg sm:text-xl md:text-2xl font-bold transition-all duration-200 ${
+                    isCorrect || wrongAnswer || showCorrect
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'hover:border-purple-500 hover:bg-purple-50 hover:scale-105 cursor-pointer'
+                  }`}
+                >
+                  {l.letter}
+                </button>
+              ))}
+            </div>
 
-        {/* Instructions */}
-        <p className="text-center text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 px-2">
-          Click letters to form the correct word • Click selected letters to remove them
-        </p>
+            {/* Instructions */}
+            <p className="text-center text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 px-2">
+              Click letters to form the correct word • Click selected letters to remove them
+            </p>
 
-        {/* Actions (bottom) */}
-        <div className="flex justify-center gap-2 sm:gap-4 mb-2">
-          <button
-            onClick={handleDontKnow}
-            className="px-3 py-2 bg-yellow-400 text-white rounded text-sm sm:text-base"
-          >
-            I Don't Know
-          </button>
-          <button
-            onClick={handleEnd}
-            className="px-3 py-2 bg-red-500 text-white rounded text-sm sm:text-base"
-          >
-            End
-          </button>
-        </div>
+            {/* Actions (bottom) */}
+            <div className="flex justify-center gap-2 sm:gap-4 mb-2">
+              <button
+                onClick={handleDontKnow}
+                className="px-3 py-2 bg-yellow-400 text-white rounded text-sm sm:text-base"
+              >
+                I Don't Know
+              </button>
+              <button
+                onClick={handleEnd}
+                className="px-3 py-2 bg-red-500 text-white rounded text-sm sm:text-base"
+              >
+                End
+              </button>
+            </div>
 
-        {/* Feedback */}
-        {wrongAnswer && (
-          <div className="text-center mt-3 sm:mt-4">
-            <p className="text-red-700 font-semibold text-sm sm:text-base">Try again!</p>
-          </div>
-        )}
-        {isCorrect && (
-          <div className="text-center mt-3 sm:mt-4">
-            <p className="text-green-700 font-semibold text-sm sm:text-base">Correct! +$0.04 bonus</p>
-          </div>
-        )}
-        {showCorrect && (
-          <div className="text-center mt-3 sm:mt-4">
-            <p className="text-blue-700 font-semibold text-sm sm:text-base">This is the correct answer. (No bonus)</p>
-          </div>
+            {/* Feedback */}
+            {wrongAnswer && (
+              <div className="text-center mt-3 sm:mt-4">
+                <p className="text-red-700 font-semibold text-sm sm:text-base">Try again!</p>
+              </div>
+            )}
+            {isCorrect && (
+              <div className="text-center mt-3 sm:mt-4">
+                <p className="text-green-700 font-semibold text-sm sm:text-base">Correct! +$0.04 bonus</p>
+              </div>
+            )}
+            {showCorrect && (
+              <div className="text-center mt-3 sm:mt-4">
+                <p className="text-blue-700 font-semibold text-sm sm:text-base">This is the correct answer. (No bonus)</p>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
