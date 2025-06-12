@@ -164,9 +164,9 @@ const WordScrambleGame = () => {
   // 4. Determine progress display type from URL (?type=bar or ?type=circle)
   const progressBarType = new URLSearchParams(window.location.search).get('type') === 'circle' ? 'circle' : 'bar';
 
-  // 5. Component state - KEY CHANGES HERE
+  // 5. Component state - UPDATED WITH POPUP STATES
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [correctCount, setCorrectCount] = useState(0); // NEW: Track correct answers
+  const [correctCount, setCorrectCount] = useState(0);
   const [availableLetters, setAvailableLetters] = useState([]);
   const [selectedLetters, setSelectedLetters] = useState([]);
   const [isCorrect, setIsCorrect] = useState(false);
@@ -176,41 +176,18 @@ const WordScrambleGame = () => {
   const [ended, setEnded] = useState(false);
   const [showCorrect, setShowCorrect] = useState(false);
   const [responses, setResponses] = useState([]);
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupAnswers, setPopupAnswers] = useState({ commitment: null, completion: null });
+  const [currentPopupCorrectCount, setCurrentPopupCorrectCount] = useState(0);
+  const [isProcessingAnswer, setIsProcessingAnswer] = useState(false);
   const scrambleRef = useRef([]);
   const dontKnowTimer = useRef(null);
-  const [currentWordRecord, setCurrentWordRecord] = useState(null);
-  const currentWord = wordsList[currentIndex];
 
-  const [showPopup, setShowPopup] = useState(false);
-const [popupQuestions, setPopupQuestions] = useState({
-  question1: '',
-  question2: '',
-  correctCount: 0
-});
-const [popupAnswers, setPopupAnswers] = useState({
-  commitment: 0,
-  completion: 0
-});
+  const currentWord = wordsList[currentIndex];
 
   // 6. Initialize each round
   useEffect(() => {
     if (!currentWord) return;
-
-   // 记录单词开始时间和基础信息
-const wordStartTime = Date.now();
-const wordRecord = {
-  wordIndex: currentIndex + 1,
-  word: currentWord.word,
-  hint: currentWord.hint,
-  wordLength: currentWord.word.length,
-  startTime: wordStartTime,
-  progressType: progressBarType,
-  correctCountAtStart: correctCount,
-  interactions: [],
-  attempts: 0,
-  urlParams: params
-};
-setCurrentWordRecord(wordRecord);
     
     let letters = currentWord.word.split('');
     do {
@@ -224,6 +201,7 @@ setCurrentWordRecord(wordRecord);
     setIsCorrect(false);
     setWrongAnswer(false);
     setShowCorrect(false);
+    setIsProcessingAnswer(false); // Reset processing flag for new word
     
     if (dontKnowTimer.current) {
       clearTimeout(dontKnowTimer.current);
@@ -238,99 +216,63 @@ setCurrentWordRecord(wordRecord);
     };
   }, [currentIndex, currentWord]);
 
-  // 7. Auto-check answer - MODIFIED LOGIC
+  // 7. Auto-check answer - UPDATED WITH POPUP LOGIC
   useEffect(() => {
     if (
       selectedLetters.length === 0 ||
       isCorrect ||
       wrongAnswer ||
       showCorrect ||
-      showPopup ||
-      availableLetters.length === currentWord.word.length
+      availableLetters.length === currentWord.word.length ||
+      isProcessingAnswer ||
+      showPopup
     ) return;
     
     if (selectedLetters.length === currentWord.word.length) {
       const attempt = selectedLetters.map((l) => l.letter).join('');
       
       if (attempt === currentWord.word) {
+        setIsProcessingAnswer(true); // Prevent multiple processing
         setIsCorrect(true);
         setScore(s => +(s + 0.04).toFixed(2));
         const newCorrectCount = correctCount + 1;
         setCorrectCount(newCorrectCount);
         
-       setTimeout(() => {
-  setIsCorrect(false);
-
-  const completedWordRecord = {
-  ...currentWordRecord,
-  endTime: Date.now(),
-  duration: Date.now() - currentWordRecord.startTime,
-  attempts: currentWordRecord.interactions.filter(i => i.currentAttempt.length === currentWord.word.length).length,
-  finalAnswer: selectedLetters.map(l => l.letter).join(''),
-  success: true
-};
-  
-  // Check if we've reached 40 correct answers
-  if (newCorrectCount >= 40) {
-    // 现有的游戏完成逻辑保持不变...
-    const responseData = {
-      word: currentWord.word,
-      userAnswer: selectedLetters.map(l => l.letter).join(''),
-      correct: true,
-      type: 'submit',
-      index: currentIndex + 1,
-      correctCount: newCorrectCount,
-      timestamp: Date.now(),
-      urlParams: params,
-      wordDetails: completedWordRecord,
-    };
-    setResponses(prev => [...prev, responseData]);
-    sendDataToQualtrics(responseData);
-    setGameComplete(true);
-  } else {
-    // Check if we need to show popup questions
-    if ([10, 20, 30, 33, 36].includes(newCorrectCount)) {
-      const responseData = {
-        word: currentWord.word,
-        userAnswer: selectedLetters.map(l => l.letter).join(''),
-        correct: true,
-        type: 'submit',
-        index: currentIndex + 1,
-        correctCount: newCorrectCount,
-        timestamp: Date.now(),
-        urlParams: params,
-      };
-      setResponses(prev => [...prev, responseData]);
-      sendDataToQualtrics(responseData);
-      
-      // Show popup questions
-      const remaining = 40 - newCorrectCount;
-      setPopupQuestions({
-        question1: `You have already spelled ${newCorrectCount} words correctly, how committed do you feel now to continue spelling the remaining ${remaining} words to complete the entire task?`,
-        question2: `How soon do you think you will complete all 40 words?`,
-        correctCount: newCorrectCount
-      });
-      setPopupAnswers({ commitment: 0, completion: 0 });
-      setShowPopup(true);
-    } else {
-      // Continue to next word normally
-      const responseData = {
-        word: currentWord.word,
-        userAnswer: selectedLetters.map(l => l.letter).join(''),
-        correct: true,
-        type: 'submit',
-        index: currentIndex + 1,
-        correctCount: newCorrectCount,
-        timestamp: Date.now(),
-        urlParams: params,
-      };
-      setResponses(prev => [...prev, responseData]);
-      sendDataToQualtrics(responseData);
-      setSelectedLetters([]);
-      setCurrentIndex((i) => i + 1);
-    }
-  }
-}, 1000);
+        setTimeout(() => {
+          setIsCorrect(false);
+          
+          // Save current word response first
+          const responseData = {
+            word: currentWord.word,
+            userAnswer: selectedLetters.map(l => l.letter).join(''),
+            correct: true,
+            type: 'submit',
+            index: currentIndex + 1,
+            correctCount: newCorrectCount,
+            timestamp: Date.now(),
+            urlParams: params,
+          };
+          setResponses(prev => [...prev, responseData]);
+          sendDataToQualtrics(responseData);
+          
+          // Check if we need to show popup questions
+          const popupTriggers = [10, 20, 30, 33, 36];
+          if (popupTriggers.includes(newCorrectCount)) {
+            setCurrentPopupCorrectCount(newCorrectCount);
+            setShowPopup(true);
+            setIsProcessingAnswer(false); // Reset processing flag
+            return; // Stop here, don't continue to next word yet
+          }
+          
+          // Check if we've reached 40 correct answers
+          if (newCorrectCount >= 40) {
+            setGameComplete(true);
+          } else {
+            // Continue to next word
+            setCurrentIndex((i) => i + 1);
+          }
+          setIsProcessingAnswer(false); // Reset processing flag
+        }, 1000);
       } else {
         setWrongAnswer(true);
         setTimeout(() => {
@@ -340,162 +282,55 @@ setCurrentWordRecord(wordRecord);
         }, 1000);
       }
     }
-  }, [selectedLetters, isCorrect, wrongAnswer, showCorrect, currentIndex, currentWord, correctCount, params]);
+  }, [selectedLetters, isCorrect, wrongAnswer, showCorrect, currentIndex, currentWord, correctCount, params, isProcessingAnswer, showPopup]);
 
   // 8. 当游戏完成时，通知 Qualtrics 显示下一步按钮
   useEffect(() => {
     if (gameComplete) {
-      // 发送完成游戏的消息给 Qualtrics
       window.parent.postMessage({ type: 'showNextButton' }, '*');
     }
   }, [gameComplete]);
 
-  // 会话级别数据收集
-useEffect(() => {
-  const sendSessionData = () => {
-    const sessionData = {
-      type: 'session_data',
-      totalWordsAttempted: currentIndex,
-      totalCorrectAnswers: correctCount,
-      totalScore: score,
-      completionStatus: gameComplete ? 'completed' : ended ? 'ended_early' : 'in_progress',
-      progressType: progressBarType,
-      startTime: responses[0]?.timestamp || Date.now(),
-      endTime: Date.now(),
-      sessionDuration: responses.length > 0 ? Date.now() - responses[0].timestamp : 0,
-      totalResponses: responses.length,
-      urlParams: params,
-      // 在现有的 sessionData 对象中添加：
-averageWordDuration: responses.filter(r => r.wordDetails).reduce((sum, r) => sum + r.wordDetails.duration, 0) / responses.filter(r => r.wordDetails).length || 0,
-totalInteractions: responses.filter(r => r.wordDetails).reduce((sum, r) => sum + r.wordDetails.interactions.length, 0),
-abandonmentPoint: ended && !gameComplete ? currentIndex + 1 : null,
-progressTypeEffect: {
-  type: progressBarType,
-  finalCorrectCount: correctCount,
-  completionRate: correctCount / Math.min(currentIndex + 1, 40)
-}
-    };
-    
-    try {
-      window.parent.postMessage({
-        type: 'sessionData',
-        data: sessionData
-      }, '*');
-      
-      if (typeof window.Qualtrics !== 'undefined' && window.Qualtrics.SurveyEngine) {
-        window.Qualtrics.SurveyEngine.setEmbeddedData('sessionData', JSON.stringify(sessionData));
-      }
-    } catch (error) {
-      console.log('Could not send session data:', error);
-    }
-  };
-
-  // 当游戏完成或结束时发送会话数据
-  if (gameComplete || ended) {
-    sendSessionData();
-  }
-
-  // 页面卸载时也发送数据
-  const handleBeforeUnload = () => {
-    sendSessionData();
-  };
-
-  window.addEventListener('beforeunload', handleBeforeUnload);
-  return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-}, [currentIndex, correctCount, score, gameComplete, ended, progressBarType, responses, params]);
-
   // 9. Helper function to send data to Qualtrics
   const sendDataToQualtrics = (responseData) => {
-
-    
-  try {
-    // 发送给父窗口
-    window.parent.postMessage({
-      type: 'wordScrambleData',
-      data: responseData
-    }, '*');
-    
-    // 同时设置Qualtrics Embedded Data（如果可用）
-    if (typeof window.Qualtrics !== 'undefined' && window.Qualtrics.SurveyEngine) {
-      window.Qualtrics.SurveyEngine.setEmbeddedData('lastResponse', JSON.stringify(responseData));
+    try {
+      window.parent.postMessage({
+        type: 'wordScrambleData',
+        data: responseData
+      }, '*');
+    } catch (error) {
+      console.log('Could not send data to parent:', error);
     }
-  } catch (error) {
-    console.log('Could not send data to parent:', error);
-  }
-};
+  };
 
   // 10. Handlers
   const pickLetter = (letter) => {
-  if (!isCorrect && !wrongAnswer && !showCorrect && selectedLetters.length < currentWord.word.length) {
-    // 记录交互行为
-    if (currentWordRecord) {
-      const interaction = {
-        type: 'select',
-        letter: letter.letter,
-        letterId: letter.id,
-        timestamp: Date.now(),
-        selectedLettersCount: selectedLetters.length,
-        currentAttempt: selectedLetters.map(l => l.letter).join('') + letter.letter
-      };
-      setCurrentWordRecord(prev => ({
-        ...prev,
-        interactions: [...prev.interactions, interaction]
-      }));
+    if (!isCorrect && !wrongAnswer && !showCorrect && selectedLetters.length < currentWord.word.length) {
+      setSelectedLetters((s) => [...s, letter]);
+      setAvailableLetters((a) => a.filter((x) => x.id !== letter.id));
     }
-    
-    setSelectedLetters((s) => [...s, letter]);
-    setAvailableLetters((a) => a.filter((x) => x.id !== letter.id));
-  }
-};
+  };
 
- const removeLetter = (letter, idx) => {
-  if (!isCorrect && !wrongAnswer && !showCorrect && letter) {
-    // 记录交互行为
-    if (currentWordRecord) {
-      const interaction = {
-        type: 'remove',
-        letter: letter.letter,
-        letterId: letter.id,
-        position: idx,
-        timestamp: Date.now(),
-        selectedLettersCount: selectedLetters.length - 1
-      };
-      setCurrentWordRecord(prev => ({
-        ...prev,
-        interactions: [...prev.interactions, interaction]
-      }));
+  const removeLetter = (letter, idx) => {
+    if (!isCorrect && !wrongAnswer && !showCorrect && letter) {
+      setAvailableLetters((a) => [...a, letter]);
+      setSelectedLetters((s) => s.filter((_, i) => i !== idx));
     }
-    
-    setAvailableLetters((a) => [...a, letter]);
-    setSelectedLetters((s) => s.filter((_, i) => i !== idx));
-  }
-};
+  };
 
-  // MODIFIED: "I Don't Know" handler - no progress increase
   const handleDontKnow = () => {
     if (showCorrect) return;
     
     setShowCorrect(true);
-
-    const completedWordRecord = {
-  ...currentWordRecord,
-  endTime: Date.now(),
-  duration: Date.now() - currentWordRecord.startTime,
-  attempts: 0, // I Don't Know 算作0次尝试
-  finalAnswer: '',
-  success: false,
-  gaveUp: true
-};
     const responseData = {
       word: currentWord.word,
       userAnswer: '',
       correct: false,
       type: 'dont_know',
       index: currentIndex + 1,
-      correctCount: correctCount, // No increase in correct count
+      correctCount: correctCount,
       timestamp: Date.now(),
       urlParams: params,
-      wordDetails: completedWordRecord,
     };
     setResponses(prev => [...prev, responseData]);
     sendDataToQualtrics(responseData);
@@ -504,24 +339,12 @@ progressTypeEffect: {
     
     dontKnowTimer.current = setTimeout(() => {
       setShowCorrect(false);
-      // Always continue to next word (no progress check needed)
-      setSelectedLetters([]);
       setCurrentIndex((i) => i + 1);
     }, 3000);
   };
 
   const handleEnd = () => {
     if (dontKnowTimer.current) clearTimeout(dontKnowTimer.current);
-
-    const completedWordRecord = {
-  ...currentWordRecord,
-  endTime: Date.now(),
-  duration: Date.now() - currentWordRecord.startTime,
-  attempts: currentWordRecord.interactions.filter(i => i.currentAttempt && i.currentAttempt.length === currentWord.word.length).length,
-  finalAnswer: selectedLetters.map(l => l.letter).join(''),
-  success: selectedLetters.map(l => l.letter).join('') === currentWord.word,
-  endedEarly: true
-};
     const responseData = {
       word: currentWord.word,
       userAnswer: selectedLetters.map(l => l.letter).join(''),
@@ -531,12 +354,44 @@ progressTypeEffect: {
       correctCount: correctCount,
       timestamp: Date.now(),
       urlParams: params,
-      wordDetails: completedWordRecord,
     };
     setResponses(prev => [...prev, responseData]);
     sendDataToQualtrics(responseData);
     window.parent.postMessage({ type: 'showNextButton' }, '*');
     setEnded(true);
+  };
+
+  // NEW: Handle popup responses
+  const handlePopupSubmit = () => {
+    if (popupAnswers.commitment === null || popupAnswers.completion === null) {
+      alert('Please answer both questions before continuing.');
+      return;
+    }
+
+    // Save popup responses
+    const popupResponseData = {
+      type: 'popup_response',
+      correctCount: currentPopupCorrectCount,
+      commitmentScore: popupAnswers.commitment,
+      completionScore: popupAnswers.completion,
+      timestamp: Date.now(),
+      urlParams: params,
+    };
+    setResponses(prev => [...prev, popupResponseData]);
+    sendDataToQualtrics(popupResponseData);
+
+    // Reset popup state
+    setShowPopup(false);
+    setPopupAnswers({ commitment: null, completion: null });
+
+    // Check if game should complete or continue
+    if (currentPopupCorrectCount >= 40) {
+      setGameComplete(true);
+    } else {
+      // Simply move to next word WITHOUT any bonus/progress changes
+      // The bonus and progress were already updated when the user got the answer correct
+      setCurrentIndex((i) => i + 1);
+    }
   };
 
   const handleExport = () => {
@@ -553,43 +408,6 @@ progressTypeEffect: {
     URL.revokeObjectURL(url);
   };
 
-  const handlePopupSubmit = () => {
-  if (popupAnswers.commitment === 0 || popupAnswers.completion === 0) {
-    alert('Please answer both questions before continuing.');
-    return;
-  }
-  
-  // Send popup responses to Qualtrics
-  const popupData = {
-    type: 'popup_response',
-    correctCount: popupQuestions.correctCount,
-    commitment: popupAnswers.commitment,
-    completion: popupAnswers.completion,
-    timestamp: Date.now(),
-    urlParams: params,
-  };
-  setResponses(prev => [...prev, popupData]);
-  sendDataToQualtrics(popupData);
-  
-  // Close popup and continue to next word
-  setShowPopup(false);
-  // Close popup and continue to next word
-setShowPopup(false);
-// 直接跳到下一个单词，但重置所有状态，避免触发auto-check
-setSelectedLetters([]);
-setCurrentIndex((i) => i + 1);
-// 确保不会触发正确答案的逻辑
-setSelectedLetters([]);
-setAvailableLetters([]);
-};
-
-const handlePopupAnswer = (question, value) => {
-  setPopupAnswers(prev => ({
-    ...prev,
-    [question]: value
-  }));
-};
-
   // 11. Circular progress component
   const CircularProgress = ({ pct }) => {
     const r = 50;
@@ -599,16 +417,13 @@ const handlePopupAnswer = (question, value) => {
     return (
       <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 mx-auto">
         <svg className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 -rotate-90" viewBox="0 0 120 120">
-          {/* 渐变定义 */}
           <defs>
             <linearGradient id="circle-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#a78bfa" />
               <stop offset="100%" stopColor="#38bdf8" />
             </linearGradient>
           </defs>
-          {/* 背景白色圆环 */}
           <circle cx="60" cy="60" r={r} stroke="#ffffff" strokeWidth="20" fill="none" />
-          {/* 渐变色圆环 */}
           <circle
             cx="60"
             cy="60"
@@ -626,6 +441,81 @@ const handlePopupAnswer = (question, value) => {
     );
   };
 
+  // NEW: Popup Questions Component
+  const PopupQuestions = () => {
+    const remaining = 40 - currentPopupCorrectCount;
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl p-6 max-w-lg w-full">
+          <h2 className="text-xl font-bold text-gray-800 mb-6 text-center">Quick Questions</h2>
+          
+          {/* Question 1 */}
+          <div className="mb-6">
+            <p className="text-gray-700 mb-4">
+              You have already spelled {currentPopupCorrectCount} words correctly. How committed do you feel now to continue spelling the remaining {remaining} words to complete the entire task?
+            </p>
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm text-gray-600">Not at all</span>
+              <span className="text-sm text-gray-600">Extremely</span>
+            </div>
+            <div className="flex justify-between">
+              {[1,2,3,4,5,6,7,8,9].map(num => (
+                <button
+                  key={num}
+                  onClick={() => setPopupAnswers(prev => ({...prev, commitment: num}))}
+                  className={`w-8 h-8 rounded-full border-2 transition-all ${
+                    popupAnswers.commitment === num 
+                      ? 'bg-purple-500 text-white border-purple-500' 
+                      : 'border-gray-300 hover:border-purple-300'
+                  }`}
+                >
+                  {num}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {/* Question 2 */}
+          <div className="mb-6">
+            <p className="text-gray-700 mb-4">
+              How soon do you think you will complete all 40 words?
+            </p>
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm text-gray-600">Very slow</span>
+              <span className="text-sm text-gray-600">Very soon</span>
+            </div>
+            <div className="flex justify-between">
+              {[1,2,3,4,5,6,7,8,9].map(num => (
+                <button
+                  key={num}
+                  onClick={() => setPopupAnswers(prev => ({...prev, completion: num}))}
+                  className={`w-8 h-8 rounded-full border-2 transition-all ${
+                    popupAnswers.completion === num 
+                      ? 'bg-purple-500 text-white border-purple-500' 
+                      : 'border-gray-300 hover:border-purple-300'
+                  }`}
+                >
+                  {num}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {/* Submit button */}
+          <div className="text-center">
+            <button
+              onClick={handlePopupSubmit}
+              className="px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // 12. End screen
   if (ended) {
     return (
@@ -637,7 +527,7 @@ const handlePopupAnswer = (question, value) => {
     );
   }
 
-  // 13. Game complete screen - MODIFIED MESSAGE
+  // 13. Game complete screen
   if (gameComplete) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-teal-500 flex items-center justify-center p-2 sm:p-4">
@@ -659,11 +549,14 @@ const handlePopupAnswer = (question, value) => {
     );
   }
 
-  // 14. Main game UI - MODIFIED PROGRESS CALCULATION
-  const percentComplete = (correctCount / 40) * 100; // Changed from currentIndex to correctCount
+  // 14. Main game UI
+  const percentComplete = (correctCount / 40) * 100;
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-teal-500 flex items-center justify-center p-2 sm:p-4">
+      {/* Popup Questions */}
+      {showPopup && <PopupQuestions />}
+      
       <div className="bg-white rounded-2xl p-4 sm:p-6 md:p-8 max-w-2xl w-full">
         {/* Header */}
         <div className="text-center mb-4 sm:mb-6">
@@ -680,10 +573,10 @@ const handlePopupAnswer = (question, value) => {
           <>
             <div className="mb-2">
               {progressBarType === 'bar' ? (
-                <div className="w-full bg-white rounded-full h-3 sm:h-4" style={{ boxShadow: 'none' }}>
+                <div className="w-full bg-white rounded-full h-3 sm:h-4">
                   <div
                     className="h-3 sm:h-4 rounded-full transition-all duration-500 bg-gradient-to-r from-purple-500 to-blue-500"
-                    style={{ width: `${percentComplete}%`, boxShadow: 'none' }}
+                    style={{ width: `${percentComplete}%` }}
                   />
                 </div>
               ) : (
@@ -695,76 +588,7 @@ const handlePopupAnswer = (question, value) => {
             </div>
           </>
         )}
-{/* Popup Questions */}
-{showPopup && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div className="bg-white rounded-2xl p-6 max-w-lg w-full">
-      <h2 className="text-xl font-bold text-gray-800 mb-6 text-center">Survey Questions</h2>
-      
-      {/* Question 1 */}
-      <div className="mb-6">
-        <p className="text-gray-700 mb-4 text-sm">
-          {popupQuestions.question1}
-        </p>
-        <div className="flex flex-wrap gap-2 justify-center">
-          {[1,2,3,4,5,6,7,8,9].map(num => (
-            <button
-              key={num}
-              onClick={() => handlePopupAnswer('commitment', num)}
-              className={`w-10 h-10 rounded-full border-2 text-sm font-semibold transition-all ${
-                popupAnswers.commitment === num 
-                  ? 'bg-purple-500 text-white border-purple-500' 
-                  : 'bg-white text-gray-700 border-gray-300 hover:border-purple-400'
-              }`}
-            >
-              {num}
-            </button>
-          ))}
-        </div>
-        <div className="flex justify-between text-xs text-gray-500 mt-2">
-          <span>1 = not at all</span>
-          <span>9 = extremely</span>
-        </div>
-      </div>
-      
-      {/* Question 2 */}
-      <div className="mb-6">
-        <p className="text-gray-700 mb-4 text-sm">
-          {popupQuestions.question2}
-        </p>
-        <div className="flex flex-wrap gap-2 justify-center">
-          {[1,2,3,4,5,6,7,8,9].map(num => (
-            <button
-              key={num}
-              onClick={() => handlePopupAnswer('completion', num)}
-              className={`w-10 h-10 rounded-full border-2 text-sm font-semibold transition-all ${
-                popupAnswers.completion === num 
-                  ? 'bg-purple-500 text-white border-purple-500' 
-                  : 'bg-white text-gray-700 border-gray-300 hover:border-purple-400'
-              }`}
-            >
-              {num}
-            </button>
-          ))}
-        </div>
-        <div className="flex justify-between text-xs text-gray-500 mt-2">
-          <span>1 = very slow</span>
-          <span>9 = very soon</span>
-        </div>
-      </div>
-      
-      {/* Submit Button */}
-      <div className="text-center">
-        <button
-          onClick={handlePopupSubmit}
-          className="px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
-        >
-          Continue
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+
         {/* Hint */}
         <div className="text-center mb-4 sm:mb-6">
           <p className="text-gray-700 text-sm sm:text-base md:text-lg font-medium px-2">{currentWord.hint}</p>
