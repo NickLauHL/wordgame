@@ -164,7 +164,7 @@ const WordScrambleGame = () => {
   // 4. Determine progress display type from URL (?type=bar or ?type=circle)
   const progressBarType = new URLSearchParams(window.location.search).get('type') === 'circle' ? 'circle' : 'bar';
 
-  // 5. Component state - UPDATED WITH POPUP STATES
+  // 5. Component state - UPDATED WITH POPUP STATES AND GAME START TIME
   const [currentIndex, setCurrentIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [availableLetters, setAvailableLetters] = useState([]);
@@ -177,15 +177,33 @@ const WordScrambleGame = () => {
   const [showCorrect, setShowCorrect] = useState(false);
   const [responses, setResponses] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
-  const [popupAnswers, setPopupAnswers] = useState({ pleasing: null, energized: null, close: null });
+  const [popupAnswers, setPopupAnswers] = useState({ motivated: null, willing: null });
   const [currentPopupCorrectCount, setCurrentPopupCorrectCount] = useState(0);
   const [isProcessingAnswer, setIsProcessingAnswer] = useState(false);
+  const [showExtraBonus, setShowExtraBonus] = useState(false);
+  const [bonusAnimationStep, setBonusAnimationStep] = useState(0);
+  const [gameStartTime, setGameStartTime] = useState(null);
   const scrambleRef = useRef([]);
   const dontKnowTimer = useRef(null);
 
   const currentWord = wordsList[currentIndex];
 
-  // 6. Initialize each round
+  // 6. Record game start time when component initializes
+  useEffect(() => {
+    if (gameStartTime === null) {
+      const startTime = Date.now();
+      setGameStartTime(startTime);
+      console.log('Game started at:', new Date(startTime).toISOString());
+    }
+  }, [gameStartTime]);
+
+  // 7. Helper function to calculate game duration
+  const calculateGameDuration = () => {
+    if (!gameStartTime) return 0;
+    return Date.now() - gameStartTime;
+  };
+
+  // 8. Initialize each round
   useEffect(() => {
     if (!currentWord) return;
     
@@ -216,7 +234,7 @@ const WordScrambleGame = () => {
     };
   }, [currentIndex, currentWord]);
 
-  // 7. Auto-check answer - UPDATED WITH POPUP LOGIC
+  // 9. Auto-check answer - UPDATED WITH POPUP LOGIC
   useEffect(() => {
     if (
       selectedLetters.length === 0 ||
@@ -234,9 +252,15 @@ const WordScrambleGame = () => {
       if (attempt === currentWord.word) {
         setIsProcessingAnswer(true); // Prevent multiple processing
         setIsCorrect(true);
-        setScore(s => +(s + 0.04).toFixed(2));
+        
         const newCorrectCount = correctCount + 1;
         setCorrectCount(newCorrectCount);
+        
+        // Calculate score based on reward structure
+        let scoreIncrease = 0.04; // Regular reward
+        const currentScore = score; // Store current score before any updates
+        console.log(`Word ${newCorrectCount}: Adding ${scoreIncrease}, current score: ${currentScore.toFixed(2)}`);
+        setScore(s => +(s + scoreIncrease).toFixed(2));
         
         setTimeout(() => {
           setIsCorrect(false);
@@ -249,14 +273,51 @@ const WordScrambleGame = () => {
             type: 'submit',
             index: currentIndex + 1,
             correctCount: newCorrectCount,
+            progressBarType: progressBarType,
             timestamp: Date.now(),
             urlParams: params,
           };
           setResponses(prev => [...prev, responseData]);
           sendDataToQualtrics(responseData);
           
+          // Check if we need to show extra bonus at 30th correct word
+          if (newCorrectCount === 30) {
+            // Move to next word first, then show bonus page
+            setCurrentIndex((i) => i + 1);
+            setTimeout(() => {
+              setShowExtraBonus(true);
+              setBonusAnimationStep(0);
+              // Start bonus animation after a short delay
+              setTimeout(() => {
+                let animationStep = 0;
+                const baseScore = currentScore + scoreIncrease; // Use stored current score
+                const animateScore = () => {
+                  animationStep++;
+                  if (animationStep <= 5) {
+                    const newScore = +(baseScore + animationStep * 0.10).toFixed(2);
+                    setScore(newScore);
+                    setBonusAnimationStep(animationStep);
+                    console.log(`Animation step ${animationStep}: adding $0.10, current score: ${newScore}`);
+                    if (animationStep < 5) {
+                      setTimeout(animateScore, 500); // 0.5 second intervals
+                    } else {
+                      // Animation complete, continue after 2 seconds
+                      setTimeout(() => {
+                        setShowExtraBonus(false);
+                        setBonusAnimationStep(0);
+                      }, 2000);
+                    }
+                  }
+                };
+                animateScore();
+              }, 1000);
+            }, 100);
+            setIsProcessingAnswer(false);
+            return;
+          }
+          
           // Check if we need to show popup questions
-          const popupTriggers = [10, 20, 30, 33, 36];
+          const popupTriggers = [31, 33, 35, 37, 39];
           if (popupTriggers.includes(newCorrectCount)) {
             setCurrentPopupCorrectCount(newCorrectCount);
             setShowPopup(true);
@@ -284,14 +345,33 @@ const WordScrambleGame = () => {
     }
   }, [selectedLetters, isCorrect, wrongAnswer, showCorrect, currentIndex, currentWord, correctCount, params, isProcessingAnswer, showPopup]);
 
-  // 8. 当游戏完成时，通知 Qualtrics 显示下一步按钮
+  // 10. 当游戏完成时，通知 Qualtrics 显示下一步按钮并发送完成数据
   useEffect(() => {
     if (gameComplete) {
+      const gameDuration = calculateGameDuration();
+      
+      // 发送游戏完成的时长数据
+      const completionData = {
+        type: 'game_complete',
+        correctCount: correctCount,
+        totalWordsAttempted: currentIndex + 1,
+        progressBarType: progressBarType,
+        timestamp: Date.now(),
+        gameStartTime: gameStartTime,
+        gameDurationMs: gameDuration,
+        gameDurationSeconds: Math.round(gameDuration / 1000),
+        gameDurationMinutes: Math.round(gameDuration / 60000 * 100) / 100, // 精确到小数点后2位
+        finalScore: score,
+        urlParams: params,
+      };
+      
+      setResponses(prev => [...prev, completionData]);
+      sendDataToQualtrics(completionData);
       window.parent.postMessage({ type: 'showNextButton' }, '*');
     }
-  }, [gameComplete]);
+  }, [gameComplete, correctCount, currentIndex, gameStartTime, score, params]);
 
-  // 9. Helper function to send data to Qualtrics
+  // 11. Helper function to send data to Qualtrics
   const sendDataToQualtrics = (responseData) => {
     try {
       window.parent.postMessage({
@@ -303,7 +383,7 @@ const WordScrambleGame = () => {
     }
   };
 
-  // 10. Handlers
+  // 12. Handlers
   const pickLetter = (letter) => {
     if (!isCorrect && !wrongAnswer && !showCorrect && selectedLetters.length < currentWord.word.length) {
       setSelectedLetters((s) => [...s, letter]);
@@ -329,6 +409,7 @@ const WordScrambleGame = () => {
       type: 'dont_know',
       index: currentIndex + 1,
       correctCount: correctCount,
+      progressBarType: progressBarType,
       timestamp: Date.now(),
       urlParams: params,
     };
@@ -345,6 +426,8 @@ const WordScrambleGame = () => {
 
   const handleEnd = () => {
     if (dontKnowTimer.current) clearTimeout(dontKnowTimer.current);
+    
+    const gameDuration = calculateGameDuration();
     const responseData = {
       word: currentWord.word,
       userAnswer: selectedLetters.map(l => l.letter).join(''),
@@ -352,7 +435,13 @@ const WordScrambleGame = () => {
       type: 'end',
       index: currentIndex + 1,
       correctCount: correctCount,
+      progressBarType: progressBarType,
       timestamp: Date.now(),
+      gameStartTime: gameStartTime,
+      gameDurationMs: gameDuration,
+      gameDurationSeconds: Math.round(gameDuration / 1000),
+      gameDurationMinutes: Math.round(gameDuration / 60000 * 100) / 100, // 精确到小数点后2位
+      finalScore: score,
       urlParams: params,
     };
     setResponses(prev => [...prev, responseData]);
@@ -363,8 +452,8 @@ const WordScrambleGame = () => {
 
   // NEW: Handle popup responses
   const handlePopupSubmit = () => {
-    if (popupAnswers.pleasing === null || popupAnswers.energized === null || popupAnswers.close === null) {
-      alert('Please answer all three questions before continuing.');
+    if (popupAnswers.motivated === null || popupAnswers.willing === null) {
+      alert('Please answer all questions before continuing.');
       return;
     }
 
@@ -372,9 +461,9 @@ const WordScrambleGame = () => {
     const popupResponseData = {
       type: 'popup_response',
       correctCount: currentPopupCorrectCount,
-      pleasingScore: popupAnswers.pleasing,
-      energizedScore: popupAnswers.energized,
-      closeScore: popupAnswers.close,
+      motivatedScore: popupAnswers.motivated,
+      willingScore: popupAnswers.willing,
+      progressBarType: progressBarType,
       timestamp: Date.now(),
       urlParams: params,
     };
@@ -383,7 +472,7 @@ const WordScrambleGame = () => {
 
     // Reset popup state
     setShowPopup(false);
-    setPopupAnswers({ pleasing: null, energized: null, close: null });
+    setPopupAnswers({ motivated: null, willing: null });
 
     // Check if game should complete or continue
     if (currentPopupCorrectCount >= 40) {
@@ -409,7 +498,7 @@ const WordScrambleGame = () => {
     URL.revokeObjectURL(url);
   };
 
-  // 11. Circular progress component
+  // 13. Circular progress component
   const CircularProgress = ({ pct }) => {
     const r = 50;
     const c = 2 * Math.PI * r;
@@ -446,24 +535,24 @@ const WordScrambleGame = () => {
   const PopupQuestions = () => {
     return (
       <div className="text-center">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6">Quick Questions</h2>
+        <div className="mb-6">
+          <p className="text-gray-700 text-sm sm:text-base font-bold text-left">Before continuing, please answer some questions</p>
+        </div>
         
         {/* Question 1 */}
         <div className="mb-8">
           <p className="text-gray-700 mb-4 text-sm sm:text-base font-bold text-left">
-            Before continuing, how pleasing is it to see your current progress?
+            How motivated do you feel to continue the task?
+            <br />
+            <span className="text-xs sm:text-sm font-normal text-gray-600">(1 = Not motivated at all, 9 = Extremely motivated)</span>
           </p>
-          <div className="flex justify-between items-center mb-2 text-xs sm:text-sm">
-            <span className="text-gray-600">Not at all pleasing</span>
-            <span className="text-gray-600">Extremely pleasing</span>
-          </div>
           <div className="flex justify-between">
             {[1,2,3,4,5,6,7,8,9].map(num => (
               <button
                 key={num}
-                onClick={() => setPopupAnswers(prev => ({...prev, pleasing: num}))}
+                onClick={() => setPopupAnswers(prev => ({...prev, motivated: num}))}
                 className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 transition-all text-xs sm:text-sm ${
-                  popupAnswers.pleasing === num 
+                  popupAnswers.motivated === num 
                     ? 'bg-purple-500 text-white border-purple-500' 
                     : 'border-gray-300 hover:border-purple-300'
                 }`}
@@ -477,45 +566,17 @@ const WordScrambleGame = () => {
         {/* Question 2 */}
         <div className="mb-8">
           <p className="text-gray-700 mb-4 text-sm sm:text-base font-bold text-left">
-            Right now, how energized do you feel?
+            How willing are you to continue the task?
+            <br />
+            <span className="text-xs sm:text-sm font-normal text-gray-600">(1 = Not willing at all, 9 = Extremely willing)</span>
           </p>
-          <div className="flex justify-between items-center mb-2 text-xs sm:text-sm">
-            <span className="text-gray-600">Not energized at all</span>
-            <span className="text-gray-600">Extremely energized</span>
-          </div>
           <div className="flex justify-between">
             {[1,2,3,4,5,6,7,8,9].map(num => (
               <button
                 key={num}
-                onClick={() => setPopupAnswers(prev => ({...prev, energized: num}))}
+                onClick={() => setPopupAnswers(prev => ({...prev, willing: num}))}
                 className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 transition-all text-xs sm:text-sm ${
-                  popupAnswers.energized === num 
-                    ? 'bg-purple-500 text-white border-purple-500' 
-                    : 'border-gray-300 hover:border-purple-300'
-                }`}
-              >
-                {num}
-              </button>
-            ))}
-          </div>
-        </div>
-        
-        {/* Question 3 */}
-        <div className="mb-8">
-          <p className="text-gray-700 mb-4 text-sm sm:text-base font-bold text-left">
-            At this moment, how close do you feel to completing your goal of spelling 40 words?
-          </p>
-          <div className="flex justify-between items-center mb-2 text-xs sm:text-sm">
-            <span className="text-gray-600">Very far away</span>
-            <span className="text-gray-600">Very close</span>
-          </div>
-          <div className="flex justify-between">
-            {[1,2,3,4,5,6,7,8,9].map(num => (
-              <button
-                key={num}
-                onClick={() => setPopupAnswers(prev => ({...prev, close: num}))}
-                className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 transition-all text-xs sm:text-sm ${
-                  popupAnswers.close === num 
+                  popupAnswers.willing === num 
                     ? 'bg-purple-500 text-white border-purple-500' 
                     : 'border-gray-300 hover:border-purple-300'
                 }`}
@@ -539,7 +600,7 @@ const WordScrambleGame = () => {
     );
   };
 
-  // 12. End screen
+  // 14. End screen
   if (ended) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-teal-500 flex items-center justify-center p-2 sm:p-4">
@@ -550,7 +611,7 @@ const WordScrambleGame = () => {
     );
   }
 
-  // 13. Game complete screen
+  // 15. Game complete screen
   if (gameComplete) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-teal-500 flex items-center justify-center p-2 sm:p-4">
@@ -572,7 +633,7 @@ const WordScrambleGame = () => {
     );
   }
 
-  // 14. Main game UI
+  // 16. Main game UI
   const percentComplete = (correctCount / 40) * 100;
   
   return (
@@ -609,8 +670,14 @@ const WordScrambleGame = () => {
           </>
         )}
 
-        {/* Show popup questions in-page OR normal game content */}
-        {showPopup ? (
+        {/* Show extra bonus screen OR popup questions OR normal game content */}
+        {showExtraBonus ? (
+          <div className="text-center">
+            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-yellow-500 mb-4">
+              🎉 You have activated extra bonus $0.50! 🎉
+            </div>
+          </div>
+        ) : showPopup ? (
           <PopupQuestions />
         ) : (
           <>
@@ -695,7 +762,9 @@ const WordScrambleGame = () => {
             )}
             {isCorrect && (
               <div className="text-center mt-3 sm:mt-4">
-                <p className="text-green-700 font-semibold text-sm sm:text-base">Correct! +$0.04 bonus</p>
+                <p className="text-green-700 font-semibold text-sm sm:text-base">
+                  Correct! +$0.04 bonus
+                </p>
               </div>
             )}
             {showCorrect && (
